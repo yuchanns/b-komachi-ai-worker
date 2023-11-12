@@ -52,8 +52,6 @@ async function handleWebhook(event) {
 async function onUpdate(update) {
 	if ('message' in update) {
 		await onMessage(update.message)
-	} else if ('inline_query' in update) {
-		await onInlineQuery(update.inline_query)
 	}
 }
 
@@ -63,8 +61,8 @@ async function translateEn(text) {
 			"role": "system", "content": `
 你是一个英语翻译引擎，请翻译给出的单词，只需要翻译不需要解释。
 如果你认为单词拼写错误，直接修正成最可能的正确拼写，不需要解释。
+如果它是一个句子，给出翻译。
 给出单词原始形态、
-单词的语种、
 对应的美式音标、
 所有含义（含词性）、
 英中双语示例，每种含义至少一条例句，总例句至少三条、
@@ -84,12 +82,30 @@ async function translateEn(text) {
  * https://core.telegram.org/bots/api#message
  */
 async function onMessage(message) {
-	await sendPlainText(message.chat.id, "正在查询，请稍候...", message.message_id)
-	const content = await translateEn(message.text)
+	const entities = message.entities ?? []
+	let isMention = false
+	for (const entity of entities) {
+		if (entity.type != "mention") {
+			continue
+		}
+		isMention = true
+		break
+	}
+	if (!isMention) {
+		return
+	}
+	const { result: { username } } = await getMe()
+	const text = message.text.replace(`@${username}`, '')
+	await sendPlainText(message.chat.id, "正在查询，请稍候...")
+	const content = await translateEn(text)
 	await sendPlainText(message.chat.id, content, message.message_id)
-	await sendPlainText(message.chat.id, "正在生成语音...", message.message_id)
-	const audioBlob = await sendTTS(message.text)
-	return await sendVoice(message.chat.id, audioBlob, message.id)
+	await sendPlainText(message.chat.id, "正在生成语音...")
+	const audioBlob = await sendTTS(text)
+	return await sendVoice(message.chat.id, audioBlob, message.message_id)
+}
+
+async function getMe() {
+	return (await fetch(apiUrl('getMe'))).json()
 }
 
 /**
@@ -152,50 +168,6 @@ async function sendOpenAI(messages) {
 	})
 	return (await fetch(request)).json()
 }
-
-/**
- * Handle incoming query
- * https://core.telegram.org/bots/api#InlineQuery
- * This will reply with a voice message but can be changed in type
- * The input file is defined in the environment variables.
- */
-async function onInlineQuery(inlineQuery) {
-	const results = []
-	const search = inlineQuery.query
-	const jsonInputFiles = await NAMESPACE.get('input_files')
-	const parsedInputFiles = JSON.parse(jsonInputFiles)
-	const number = Object.keys(parsedInputFiles).length
-	for (let i = 0; i < number; i++) {
-		const caption = parsedInputFiles[i][3]
-		const title = parsedInputFiles[i][0]
-		if ((caption.toLowerCase().includes(search.toLowerCase())) || title.toLowerCase().includes(search.toLowerCase())) {
-			results.push({
-				type: 'voice',
-				id: crypto.randomUUID(),
-				voice_url: parsedInputFiles[i][1],
-				title: parsedInputFiles[i][0],
-				voice_duration: parsedInputFiles[i][2],
-				caption: parsedInputFiles[i][3],
-				parse_mode: 'HTML'
-			})
-		}
-	}
-	const res = JSON.stringify(results)
-	return SendInlineQuery(inlineQuery.id, res)
-}
-
-/**
- * Send result of the query
- * https://core.telegram.org/bots/api#answerinlinequery
- */
-
-async function SendInlineQuery(inlineQueryId, results) {
-	return (await fetch(apiUrl('answerInlineQuery', {
-		inline_query_id: inlineQueryId,
-		results
-	}))).json()
-}
-
 /**
  * Set webhook to this worker's url
  * https://core.telegram.org/bots/api#setwebhook
