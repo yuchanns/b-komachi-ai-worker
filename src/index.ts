@@ -55,14 +55,15 @@ async function onUpdate(update) {
 	}
 }
 
-async function translateEn(text) {
-	const response = await sendOpenAI([
+function getTranslatorPrompts(text) {
+	return [
 		{
 			"role": "system", "content": `
 你是一个英语翻译引擎，请翻译给出的单词，只需要翻译不需要解释。
 如果你认为单词拼写错误，直接修正成最可能的正确拼写，不需要解释。
 如果它是一个句子，给出翻译。
 给出单词原始形态、
+、
 对应的美式音标、
 所有含义（含词性）、
 英中双语示例，每种含义至少一条例句，总例句至少三条、
@@ -73,7 +74,17 @@ async function translateEn(text) {
     `},
 		{ "role": "assistant", "content": "好的，我明白了，请给我这个单词。" },
 		{ "role": "user", "content": `单词是: ${text}` }
-	])
+	]
+}
+
+async function translateEnStream(text, cb) {
+	const prompts = getTranslatorPrompts(text)
+	return await sendOpenAIStream(prompts, cb)
+}
+
+async function translateEn(text) {
+	const prompts = getTranslatorPrompts(text)
+	const response = await sendOpenAIJson(prompts)
 	return response.choices[0]?.message?.content ?? JSON.stringify(response)
 }
 
@@ -96,10 +107,23 @@ async function onMessage(message) {
 	}
 	const { result: { username } } = await getMe()
 	const text = message.text.replace(`@${username}`, '')
-	await sendPlainText(message.chat.id, "正在查询，请稍候...")
-	const content = await translateEn(text)
-	await sendPlainText(message.chat.id, content, message.message_id)
-	await sendPlainText(message.chat.id, "正在生成语音...")
+	const response = await sendPlainText(message.chat.id, "正在查询，请稍候...", message.message_id)
+	const updateMessageId = response?.result?.message_id
+	if (!updateMessageId) {
+		return
+	}
+	// const content = await translateEn(text)
+	// await sendPlainText(message.chat.id, content, message.message_id)
+	let chunkText = ""
+	await translateEnStream(text, async function (chunk, done) {
+		chunkText += chunk
+		if (!done && chunkText.length % 50 != 0) {
+			return
+		}
+		await updatePlainText(message.chat.id, chunkText, updateMessageId)
+		return
+	})
+	await sendPlainText(message.chat.id, chunkText)
 	const audioBlob = await sendTTS(text)
 	return await sendVoice(message.chat.id, audioBlob, message.message_id)
 }
@@ -121,6 +145,15 @@ async function sendPlainText(chatId, text, messageId = null) {
 		body["reply_to_message_id"] = messageId
 	}
 	return (await fetch(apiUrl('sendMessage', body))).json()
+}
+
+async function updatePlainText(chatId, text, messageId) {
+	let body = {
+		chat_id: chatId,
+		text,
+		message_id: messageId
+	}
+	return (await fetch(apiUrl('editMessageText', body))).json()
 }
 
 async function sendVoice(chatId, audioBlob, messageId = null) {
@@ -153,10 +186,11 @@ async function sendTTS(text) {
 	return response.blob()
 }
 
-async function sendOpenAI(messages) {
+async function sendOpenAI(messages, stream) {
 	const body = JSON.stringify({
 		messages,
-		temperature: 0.3
+		temperature: 0.3,
+		stream
 	})
 	const request = new Request(openaiUrl(), {
 		method: "POST",
@@ -166,7 +200,51 @@ async function sendOpenAI(messages) {
 		},
 		body
 	})
-	return (await fetch(request)).json()
+	return await fetch(request)
+}
+
+async function readStream(reader, cb) {
+	const decoder = new TextDecoder()
+	let decoded = ""
+	const prefix = "data: "
+	while (true) {
+		const { value, done } = await reader.read();
+		if (done) {
+			await cb("", true)
+			return;
+		}
+		decoded += decoder.decode(value, { stream: true })
+		let lineEndIndex
+		while ((lineEndIndex = decoded.indexOf('\n')) !== -1) {
+			const line = decoded.slice(0, lineEndIndex);
+			decoded = decoded.slice(lineEndIndex + 1);
+			if (line == "") {
+				continue
+			}
+			if (!line.startsWith(prefix)) {
+				return
+			}
+			const data = line.slice(prefix.length)
+			if (data == "[DONE]") {
+				await cb("", true)
+				return
+			}
+			const content = JSON.parse(data)?.choices[0]?.delta?.content
+			if (content) {
+				await cb(content, false)
+			}
+		}
+	}
+}
+
+async function sendOpenAIStream(messages, cb) {
+	const response = await sendOpenAI(messages, true)
+	const reader = response.body.getReader()
+	return await readStream(reader, cb)
+}
+
+async function sendOpenAIJson(messages) {
+	return (await sendOpenAI(messages, false)).json()
 }
 /**
  * Set webhook to this worker's url
