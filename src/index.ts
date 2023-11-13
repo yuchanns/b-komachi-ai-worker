@@ -123,7 +123,6 @@ async function onMessage(message) {
 		await updatePlainText(message.chat.id, chunkText, updateMessageId)
 		return
 	})
-	await sendPlainText(message.chat.id, chunkText)
 	const audioBlob = await sendTTS(text)
 	return await sendVoice(message.chat.id, audioBlob, message.message_id)
 }
