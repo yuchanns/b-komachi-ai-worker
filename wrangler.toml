@@ -1,7 +1,6 @@
 name = "b-komachi-ai"
 main = "src/index.ts"
 compatibility_date = "2023-11-12"
-usage_model = "standard"
 env = { }
 
 [placement]
@@ -11,6 +10,3 @@ mode = "smart"
 crons = [ ]
 
 [vars]
-ENV_AZURE_API_VERSION = "2023-09-01-preview"
-ENV_AZURE_TTS_ENDPOINT = "https://eastus.tts.speech.microsoft.com"
-ENV_AZURE_URL = "https://yuchanns-openai.openai.azure.com/openai/deployments/gpt35"

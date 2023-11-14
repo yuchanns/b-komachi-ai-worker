@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+  pull_request:
+   branches:
+   - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        secrets: |
+          ENV_BOT_TOKEN
+          ENV_BOT_SECRET
+          ENV_AZURE_URL
+          ENV_AZURE_API_KEY
+          ENV_AZURE_API_VERSION
+          ENV_AZURE_TTS_ENDPOINT
+          ENV_AZURE_TTS_KEY
+      env:
+        ENV_BOT_TOKEN: ${{ secrets.ENV_BOT_TOKEN }}
+        ENV_BOT_SECRET: ${{ secrets.ENV_BOT_SECRET }}
+        ENV_AZURE_URL: ${{ secrets.ENV_AZURE_URL }}
+        ENV_AZURE_API_KEY: ${{ secrets.ENV_AZURE_API_KEY }}
+        ENV_AZURE_API_VERSION: ${{ secrets.ENV_AZURE_API_VERSION }}
+        ENV_AZURE_TTS_ENDPOINT: ${{ secrets.ENV_AZURE_TTS_ENDPOINT }}
+        ENV_AZURE_TTS_KEY: ${{ secrets.ENV_AZURE_TTS_KEY }}
