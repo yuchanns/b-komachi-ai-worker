@@ -17,7 +17,7 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/f5ca0820-00b9-4a
 
 ## 🛠️ Deploy
 
-Users must provide the following environment variables within their Cloudflare Workers:
+Users must provide the following environment variables within GitHub's Secrets - go to "Settings -> Secrets":
 
 |Name|Description|Example|
 |---|---|---|
@@ -26,10 +26,10 @@ Users must provide the following environment variables within their Cloudflare W
 |ENV_AZURE_API_VERSION|Azure OpenAI API Version|2023-09-01-preview|
 |ENV_AZURE_TTS_ENDPOINT|Azure TextToSpeech Endpoint|https://eastus.tts.speech.microsoft.com|
 |ENV_AZURE_TTS_KEY|Azure TextToSpeech Key||
-|ENV_BOT_SECRET|Telegram Bot Verification Secret||
+|ENV_BOT_SECRET|Telegram Bot Verification Secret, Random Generate From `A-Z, a-z, 0-9, _ and -`||
 |ENV_BOT_TOKEN|Telegram Bot Token||
 
-Subsequently, deploy the worker script.
+Subsequently, deploy the worker by triggering Github Actions.
 
 🔗 Useful references:
 - [Telegram Bot Father](https://core.telegram.org/bots/tutorial)
