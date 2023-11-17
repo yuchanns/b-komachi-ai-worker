@@ -22,13 +22,20 @@ app.get('/unRegisterWebhook', async (c) => {
 	return new Response(r.ok ? 'Ok' : r.description ?? '')
 })
 
-app.get(WEBHOOK, async (c) => {
+app.post(WEBHOOK, async (c) => {
 	const update: Update = await c.req.json()
 	if (update.message && isMentioned(update.message)) {
 		const bot = createBot(c)
 		const ai = createOpenAI(c)
 		const tts = createTTS(c)
-		await translate(update.message, { bot, ai, tts })
+		try {
+			await translate(update.message, { bot, ai, tts })
+		} catch (error) {
+			await bot.sendMessage({
+				chat_id: update.message.chat.id,
+				text: `${error}`
+			})
+		}
 	}
 	return new Response('Ok')
 })
