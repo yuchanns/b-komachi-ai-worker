@@ -2,7 +2,7 @@
 
 A sophisticated Telegram bot Vocabulary Assistant deployed on Cloudflare Worker.
 
-AzureOpenAI + AzureTTS 🗣️
+AzureOpenAI + EdgeTTS 🗣️
 
 
 https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/f5ca0820-00b9-4a4e-aa45-70d67602da7b
@@ -24,8 +24,6 @@ Users must provide the following environment variables within GitHub's Secrets -
 |ENV_AZURE_URL|Azure OpenAI Deployment Endpoint|https://yuchanns-openai.openai.azure.com/openai/deployments/gpt35|
 |ENV_AZURE_API_KEY|Azure OpenAI API Key||
 |ENV_AZURE_API_VERSION|Azure OpenAI API Version|2023-09-01-preview|
-|ENV_AZURE_TTS_ENDPOINT|Azure TextToSpeech Endpoint|https://eastus.tts.speech.microsoft.com|
-|ENV_AZURE_TTS_KEY|Azure TextToSpeech Key||
 |ENV_BOT_SECRET|Telegram Bot Verification Secret, Random Generate From `A-Z, a-z, 0-9, _ and -`||
 |ENV_BOT_TOKEN|Telegram Bot Token||
 
