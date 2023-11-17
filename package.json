@@ -1,7 +1,7 @@
 
 {
 	"name": "b-komachi-ai",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"private": true,
 	"scripts": {
 		"dev": "wrangler dev src/index.ts",
