@@ -51,7 +51,7 @@ export const translate = async (
 	})
 	const me = await bot.getMe()
 	const text = rawText?.
-		replace(`@${me.result.username} `, "") ?? ""
+		replace(`@${me.result.username}`, "") ?? ""
 	const params = {
 		messages: promptToTranslate(text),
 		temperature: 0.3
