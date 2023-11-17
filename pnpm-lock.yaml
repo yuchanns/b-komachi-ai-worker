@@ -4,7 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  hono:
+    specifier: ^3.10.0
+    version: registry.npmmirror.com/hono@3.10.0
+
 devDependencies:
+  '@cloudflare/workers-types':
+    specifier: ^4.20230914.0
+    version: registry.npmmirror.com/@cloudflare/workers-types@4.20231025.0
   wrangler:
     specifier: ^3.0.0
     version: registry.npmmirror.com/wrangler@3.15.0
@@ -73,6 +81,12 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  registry.npmmirror.com/@cloudflare/workers-types@4.20231025.0:
+    resolution: {integrity: sha512-TkcZkntUTOcvJ4vgmwpNfLTclpMbmbClZCe62B25/VTukmyv91joRa4eKzSjzCZUXTbFHNmVdOpmGaaJU2U3+A==, tarball: https://registry.npmmirror.com/@cloudflare/workers-types/-/workers-types-4.20231025.0.tgz}
+    name: '@cloudflare/workers-types'
+    version: 4.20231025.0
+    dev: true
 
   registry.npmmirror.com/@esbuild-plugins/node-globals-polyfill@0.2.3(esbuild@0.17.19):
     resolution: {integrity: sha512-r3MIryXDeXDOZh7ih1l/yE9ZLORCd5e8vWg02azWRGj5SPTuoh69A2AIyn0Z31V/kHBfZ4HgWJ+OK3GTTwLmnw==, tarball: https://registry.npmmirror.com/@esbuild-plugins/node-globals-polyfill/-/node-globals-polyfill-0.2.3.tgz}
@@ -573,6 +587,13 @@ packages:
     name: glob-to-regexp
     version: 0.4.1
     dev: true
+
+  registry.npmmirror.com/hono@3.10.0:
+    resolution: {integrity: sha512-rN8PNMt66U58Qj3+L8gr7EsaYnj56cBDS2MjhUnMgDaXoyw44/OeFDsmXXzn/YQ7CAWeENC3Dq/kp+4RJSNE3Q==, tarball: https://registry.npmmirror.com/hono/-/hono-3.10.0.tgz}
+    name: hono
+    version: 3.10.0
+    engines: {node: '>=16.0.0'}
+    dev: false
 
   registry.npmmirror.com/is-binary-path@2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==, tarball: https://registry.npmmirror.com/is-binary-path/-/is-binary-path-2.1.0.tgz}
