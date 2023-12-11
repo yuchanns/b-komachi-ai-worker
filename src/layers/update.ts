@@ -18,13 +18,13 @@ const promptToTranslate = (text: string) => {
 				+ `例如:`
 				+ `输入: A sophisticated Telegram bot Vocabulary Assistant deployed on Cloudflare Worker. `
 				+ `你的输出应该是:`
-				+ `[[sentence]]`
+				+ `[sentence]`
 				+ `text = "部署在Cloudflare Worker上的高级Telegram机器人词汇助手。"`
 				+ `输入: like`
 				+ `你的输出应该是:`
-				+ `[[word]]`
+				+ `[word]`
 				+ `text = "like" # 单词原型`
-				+ `[[pronunciation]]`
+				+ `[pronunciation]`
 				+ `ipa = "/laɪk/" # 美式发音`
 				+ `[[meaning]] # 含义`
 				+ `part_of_speech = "v." # 动词`
@@ -47,9 +47,9 @@ const promptToTranslate = (text: string) => {
 				+ `[[example]] # 例句`
 				+ `sentence = "I like your idea" # 例句`
 				+ `translation = "我喜欢你的想法" # 翻译`
-				+ `[[origin]] # 起源`
+				+ `[origin] # 起源`
 				+ `etymology = "源自古英语“lician”，意为“爱、喜欢”。"`
-				+ `[[related]]`
+				+ `[related]`
 				+ `prefixes = [] # 前缀`
 				+ `suffixes = ["-ly"] # 后缀`
 				+ `roots = ["lik-"] # 词根`
