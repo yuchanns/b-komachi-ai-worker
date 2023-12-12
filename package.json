@@ -1,17 +1,23 @@
-
 {
 	"name": "b-komachi-ai",
 	"version": "0.1.1",
 	"private": true,
 	"scripts": {
 		"dev": "wrangler dev src/index.ts",
-		"deploy": "wrangler deploy --minify src/index.ts"
+		"deploy": "wrangler deploy --minify src/index.ts",
+		"test": "jest --verbose"
 	},
 	"dependencies": {
-		"hono": "^3.10.0"
+		"hono": "^3.11.4"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20230914.0",
-		"wrangler": "^3.0.0"
+		"@types/jest": "^29.5.11",
+		"esbuild": "^0.19.9",
+		"esbuild-jest": "^0.5.0",
+		"jest": "^29.7.0",
+		"jest-environment-miniflare": "^2.14.1",
+		"miniflare": "^3.20231030.3",
+		"wrangler": "^3.19.0"
 	}
 }
