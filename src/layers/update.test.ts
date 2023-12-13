@@ -1,6 +1,7 @@
 import { Injector } from "../types"
-import { differenciate, promptToTranslate } from "./update"
+import { differenciate, promptToAnalyze, promptToTranslate } from "./update"
 import createTelegramBotAPI, { createOpenAIAPI } from "../clients"
+import toml from "markty-toml"
 
 const env = getMiniflareBindings()
 
@@ -58,5 +59,25 @@ print("hello world")
 `,
 			parse_mode: "MarkdownV2",
 		})
+	})
+})
+
+describe("toml", () => {
+	const ai = createOpenAIAPI({
+		url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
+	})
+	test("parse", async () => {
+		const messages = promptToAnalyze("sophisticated")
+		const resp = await ai.chat({
+			messages,
+			temperature: 0.3
+		})
+		const content = resp?.choices[0]?.message.content ?? ""
+		try {
+			const parsed = toml(content)
+			console.log(parsed)
+		} catch (error) {
+			console.log(content)
+		}
 	})
 })
