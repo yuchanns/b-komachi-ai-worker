@@ -234,7 +234,8 @@ export const translate = async (
 	const typ = await differenciate(inj, text)
 	if (typ == "word" || typ == "phrase") {
 		await _analyze(inj, text, chat_id, message_id, reply_to_message_id)
-	} else if (typ == "sentence") {
+	} else {
+		// FIXME: issue of typ out of range
 		await _translate(inj, text, chat_id, message_id, reply_to_message_id)
 	}
 	return
