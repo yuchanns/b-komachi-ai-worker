@@ -1,6 +1,6 @@
 import { Injector } from "../types"
 import { differenciate, promptToTranslate } from "./update"
-import { createOpenAIAPI } from "../clients"
+import createTelegramBotAPI, { createOpenAIAPI } from "../clients"
 
 const env = getMiniflareBindings()
 
@@ -32,5 +32,31 @@ describe("ai", () => {
 		const response = await inj.ai.chat(params)
 		console.log(response?.
 			choices[0]?.message.content)
+	})
+})
+
+describe("bot", () => {
+	const bot = createTelegramBotAPI(env.ENV_BOT_TOKEN)
+	test("getMe", async () => {
+		const resp = await bot.getMe()
+		console.log(resp)
+	})
+	test("markdown", async () => {
+		await bot.sendMessage({
+			chat_id: env.ENV_CHAT_ID,
+			text: `
+*bold*
+_italic_
+__underline__
+~strikethrought~
+||spoiler||
+[inline URL](https://github.com/yuchanns)
+\`inline code\`
+\`\`\`python
+print("hello world")
+\`\`\`
+`,
+			parse_mode: "MarkdownV2",
+		})
 	})
 })
