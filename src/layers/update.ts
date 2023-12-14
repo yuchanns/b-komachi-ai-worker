@@ -1,5 +1,7 @@
+import toml from "markty-toml"
 import { Message } from "../clients"
 import { Injector } from "../types"
+import { Analyze } from "./types"
 
 const types = ["word", "phrase", "sentence"]
 
@@ -188,6 +190,54 @@ const _translate = async (
 	})
 }
 
+export const gen_md_analyze = (parsed: Analyze) => {
+	let text = ""
+	if (parsed.word?.text !== undefined) {
+		text += `*${parsed.word.text}*\n`
+	}
+	if (parsed.pronunciation?.ipa !== undefined) {
+		text += `美式 __${parsed.pronunciation.ipa}__\n`
+	}
+	if (parsed.meaning !== undefined) {
+		for (let { part_of_speech, definitions } of parsed.meaning) {
+			text += `_[${part_of_speech}]_ ${definitions.join(",")}\n`
+		}
+	}
+	if (parsed.example !== undefined) {
+		text += `*例句*\n`
+		for (let { sentence, translation } of parsed.example) {
+			text += `${sentence}\n||${translation}||\n`
+		}
+	}
+	if (parsed.origin?.etymology !== undefined) {
+		text += `*词源*\n${parsed.origin.etymology}\n`
+	}
+	if (parsed.related !== undefined) {
+		text += `[词根] ${parsed.related.roots.join(",")}\n`
+			+ `[前缀] ${parsed.related.prefixes.join(",")}\n`
+			+ `[后缀] ${parsed.related.suffixes.join(",")}\n`
+	}
+	if (parsed.derivatives !== undefined) {
+		text += `*派生*\n`
+		for (let { word, meaning } of parsed.derivatives) {
+			text += `_${word}_ ${meaning.join(",")}\n`
+		}
+	}
+	if (parsed.synonyms !== undefined) {
+		text += `*近义*\n`
+		for (let { word, meaning } of parsed.synonyms) {
+			text += `_${word}_ ${meaning.join(",")}\n`
+		}
+	}
+	if (parsed.homophones !== undefined) {
+		text += `*形似*\n`
+		for (let { word, meaning } of parsed.homophones) {
+			text += `_${word}_ ${meaning.join(",")}\n`
+		}
+	}
+	return text
+}
+
 const _analyze = async (
 	inj: Injector, text: string, chat_id: number,
 	message_id: number, reply_to_message_id: number,
@@ -203,8 +253,18 @@ const _analyze = async (
 		if ((!done && chunkText.length % 50 != 0) || chunkText.length == 0) {
 			return
 		}
+		let parsed: Analyze
+		try {
+			parsed = toml(chunkText) as Analyze
+		} catch (error) {
+			return
+		}
+		if (!parsed) {
+			return
+		}
+		const text = gen_md_analyze(parsed)
 		await bot.editMessageText({
-			chat_id, message_id, text: chunkText
+			chat_id, message_id, text, parse_mode: "MarkdownV2"
 		})
 	})
 	const voice = await tts.textToSpeech({ text })
