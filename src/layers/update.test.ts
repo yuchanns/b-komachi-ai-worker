@@ -68,16 +68,19 @@ describe("toml", () => {
 	})
 	test("parse", async () => {
 		const messages = promptToAnalyze("sophisticated")
+		let chunkText = ""
 		const resp = await ai.chat({
 			messages,
 			temperature: 0.3
+		}, (r, done) => {
+			chunkText += r?.choices[0]?.delta.content ?? ""
+			try {
+				const parsed = toml(chunkText) as Analyze
+				console.log(parsed.word)
+			} catch (error) {
+				console.log(chunkText)
+			}
 		})
-		const content = resp?.choices[0]?.message.content ?? ""
-		try {
-			const parsed = toml(content)
-			console.log(parsed)
-		} catch (error) {
-			console.log(content)
-		}
 	})
 })
+

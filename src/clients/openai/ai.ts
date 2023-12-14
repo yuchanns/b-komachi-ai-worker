@@ -91,7 +91,7 @@ export const createOpenAIAPI = (params: {
 				throw Error(response.statusText)
 			}
 			if (!onStream) {
-				return response.json()
+				return await response.json()
 			}
 			if (!response.body) {
 				throw Error("no body")
