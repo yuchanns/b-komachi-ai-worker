@@ -200,6 +200,9 @@ export const gen_md_analyze = (parsed: Analyze) => {
 	}
 	if (parsed.meaning !== undefined) {
 		for (let { part_of_speech, definitions } of parsed.meaning) {
+			if (Array.isArray(definitions)) {
+				continue
+			}
 			text += `_[${part_of_speech}]_ ${definitions.join(",")}\n`
 		}
 	}
@@ -213,26 +216,38 @@ export const gen_md_analyze = (parsed: Analyze) => {
 		text += `*词源*\n${parsed.origin.etymology}\n`
 	}
 	if (parsed.related !== undefined) {
-		text += `[词根] ${parsed.related.roots.join(",")}\n`
-			+ `[前缀] ${parsed.related.prefixes.join(",")}\n`
-			+ `[后缀] ${parsed.related.suffixes.join(",")}\n`
+		if (Array.isArray(parsed.related.roots)) {
+			text += `[词根] ${parsed.related.roots.join(",")}\n`
+		}
+		if (Array.isArray(parsed.related.prefixes)) {
+			text += `[前缀] ${parsed.related.prefixes.join(",")}\n`
+		}
+		if (Array.isArray(parsed.related.suffixes)) {
+			text += `[后缀] ${parsed.related.suffixes.join(",")}\n`
+		}
 	}
 	if (parsed.derivatives !== undefined) {
 		text += `*派生*\n`
 		for (let { word, meaning } of parsed.derivatives) {
-			text += `_${word}_ ${meaning.join(",")}\n`
+			if (Array.isArray(meaning)) {
+				text += `_${word}_ ${meaning.join(",")}\n`
+			}
 		}
 	}
 	if (parsed.synonyms !== undefined) {
 		text += `*近义*\n`
 		for (let { word, meaning } of parsed.synonyms) {
-			text += `_${word}_ ${meaning.join(",")}\n`
+			if (Array.isArray(meaning)) {
+				text += `_${word}_ ${meaning.join(",")}\n`
+			}
 		}
 	}
 	if (parsed.homophones !== undefined) {
 		text += `*形似*\n`
 		for (let { word, meaning } of parsed.homophones) {
-			text += `_${word}_ ${meaning.join(",")}\n`
+			if (Array.isArray(meaning)) {
+				text += `_${word}_ ${meaning.join(",")}\n`
+			}
 		}
 	}
 	return text
