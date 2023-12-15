@@ -8,6 +8,9 @@ dependencies:
   hono:
     specifier: ^3.11.4
     version: 3.11.4
+  markty-toml:
+    specifier: ^0.1.1
+    version: 0.1.1
 
 devDependencies:
   '@cloudflare/workers-types':
@@ -3248,6 +3251,16 @@ packages:
     dependencies:
       object-visit: 1.0.1
     dev: true
+
+  /markty-toml@0.1.1:
+    resolution: {integrity: sha512-no+RbxQ+CbFpHMW7bQOzsR/6BO1fLvgZ7+I+pHoIPfyt3fz8ULFNgl5rXf+J4vFLRj67omgpDCxOwTLXhmWDYw==}
+    dependencies:
+      markty: 0.0.4
+    dev: false
+
+  /markty@0.0.4:
+    resolution: {integrity: sha512-V2g+PRfySY9zKL0n4NHuE2rK2daHuVrcdRaJ8Gfhy4IYwEb2NywCSqCrxrn2LSJQ+dXf2Gubqw9+kU5m7fXUJw==}
+    dev: false
 
   /merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}

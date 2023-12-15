@@ -1,6 +1,6 @@
 import { Injector } from "../types"
-import { differenciate, promptToTranslate } from "./update"
-import createTelegramBotAPI, { createOpenAIAPI } from "../clients"
+import { _analyze, differenciate, promptToTranslate } from "./update"
+import createTelegramBotAPI, { createEdgeTTSAPI, createOpenAIAPI } from "../clients"
 
 const env = getMiniflareBindings()
 
@@ -59,4 +59,23 @@ print("hello world")
 			parse_mode: "MarkdownV2",
 		})
 	})
+})
+
+describe("toml", () => {
+	const inj = {
+		ai: createOpenAIAPI({
+			url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
+		}),
+		bot: createTelegramBotAPI(env.ENV_BOT_TOKEN),
+		tts: createEdgeTTSAPI()
+	} as Injector
+	test("parse", async () => {
+		const {
+			result: { message_id },
+		} = await inj.bot.sendMessage({
+			chat_id: env.ENV_CHAT_ID,
+			text: "正在查询，请稍候..."
+		})
+		await _analyze(inj, "sophisticated", Number(env.ENV_CHAT_ID), message_id, Number(undefined))
+	}, 10000)
 })

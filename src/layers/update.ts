@@ -1,5 +1,7 @@
+import toml from "markty-toml"
 import { Message } from "../clients"
 import { Injector } from "../types"
+import { Analyze } from "./types"
 
 const types = ["word", "phrase", "sentence"]
 
@@ -80,61 +82,61 @@ export const promptToAnalyze = (text: string) => {
 				+ `输入: like`
 				+ `你的输出应该是:`
 				+ `[word]`
-				+ `text = "like" # 单词原型`
+				+ `text = "like"`
 				+ `[pronunciation]`
-				+ `ipa = "/laɪk/" # 美式发音`
-				+ `[[meaning]] # 含义`
-				+ `part_of_speech = "v." # 动词`
+				+ `ipa = "/laɪk/"`
+				+ `[[meaning]]`
+				+ `part_of_speech = "v."`
 				+ `definitions = [`
 				+ `"喜欢",`
 				+ `"喜爱",`
-				+ `] # 定义`
-				+ `[[meaning]] # 含义`
-				+ `part_of_speech = "prep." # 介词`
+				+ `]`
+				+ `[[meaning]]`
+				+ `part_of_speech = "prep."`
 				+ `definitions = [`
 				+ `"像",`
 				+ `"如同",`
-				+ `] # 定义`
-				+ `[[example]] # 例句`
-				+ `sentence = "I really like chocolate ice cream." # 例句`
-				+ `translation = "我真的很喜欢巧克力冰淇淋" # 翻译`
-				+ `[[example]] # 例句`
-				+ `sentence = "She looks like her mother." # 例句`
-				+ `translation = "她长得像她的母亲" # 翻译`
-				+ `[[example]] # 例句`
-				+ `sentence = "I like your idea" # 例句`
-				+ `translation = "我喜欢你的想法" # 翻译`
-				+ `[origin] # 起源`
+				+ `]`
+				+ `[[example]]`
+				+ `sentence = "I really like chocolate ice cream."`
+				+ `translation = "我真的很喜欢巧克力冰淇淋"`
+				+ `[[example]]`
+				+ `sentence = "She looks like her mother."`
+				+ `translation = "她长得像她的母亲"`
+				+ `[[example]]`
+				+ `sentence = "I like your idea"`
+				+ `translation = "我喜欢你的想法"`
+				+ `[origin]`
 				+ `etymology = "源自古英语“lician”，意为“爱、喜欢”。"`
 				+ `[related]`
-				+ `prefixes = [] # 前缀`
-				+ `suffixes = ["-ly"] # 后缀`
-				+ `roots = ["lik-"] # 词根`
-				+ `[[derivatives]] # 派生词`
+				+ `prefixes = []`
+				+ `suffixes = ["-ly"]`
+				+ `roots = ["lik-"]`
+				+ `[[derivatives]]`
 				+ `word = "dislike"`
 				+ `meaning = ["不喜欢", "厌恶"]`
-				+ `[[derivatives]] # 派生词`
+				+ `[[derivatives]]`
 				+ `word = "alike"`
 				+ `meaning = ["相似的", "相同的", "相似地", "相同地"]`
-				+ `[[derivatives]] # 派生词`
+				+ `[[derivatives]]`
 				+ `word = "unlike"`
 				+ `meaning = ["不像", "与...不同"]`
-				+ `[[synonyms]] # 同义词`
+				+ `[[synonyms]]`
 				+ `word = "love"`
 				+ `meaning = ["爱", "情感"]`
-				+ `[[synonyms]] # 同义词`
+				+ `[[synonyms]]`
 				+ `word = "enjoy"`
 				+ `meaning = ["享受", "喜爱"]`
-				+ `[[synonyms]] # 同义词`
+				+ `[[synonyms]]`
 				+ `word = "adore"`
 				+ `meaning = ["崇拜", "爱慕"]`
-				+ `[[synonyms]] # 同义词`
+				+ `[[synonyms]]`
 				+ `word = "appreciate"`
 				+ `meaning = ["欣赏", "感激", "重视"]`
-				+ `[[homophones]] # 形似词`
+				+ `[[homophones]]`
 				+ `word = "hike"`
 				+ `meaning = ["远足", "徒步"]`
-				+ `[[homophones]] # 形似词`
+				+ `[[homophones]]`
 				+ `word = "bike"`
 				+ `meaning = ["自行车"]`
 		},
@@ -188,7 +190,64 @@ const _translate = async (
 	})
 }
 
-const _analyze = async (
+export const gen_md_analyze = (parsed: Analyze) => {
+	let text = ""
+	if (parsed.word !== undefined) {
+		text += `*${parsed.word.text}*\n\n`
+	}
+	if (parsed.pronunciation !== undefined) {
+		text += `🗣️ *音标* _${parsed.pronunciation.ipa}_\n`
+	}
+	if (parsed.meaning !== undefined) {
+		for (let { part_of_speech, definitions } of parsed.meaning) {
+			if (!Array.isArray(definitions)) {
+				continue
+			}
+			text += `_[${part_of_speech}]_ ${definitions.join(",")}\n`
+		}
+	}
+	if (parsed.example !== undefined) {
+		text += `\n💡 *例句*\n`
+		for (let { sentence, translation } of parsed.example) {
+			text += `- ${sentence}\n  (${translation})\n`
+		}
+		text += `\n`
+	}
+	if (parsed.origin !== undefined) {
+		text += `🔍 *词源*\n- ${parsed.origin.etymology}\n`
+		text += `\n`
+	}
+	if (parsed.derivatives !== undefined) {
+		text += `🤓 *派生*\n`
+		for (let { word, meaning } of parsed.derivatives) {
+			if (Array.isArray(meaning)) {
+				text += `- _${word}_ ${meaning.join(",")}\n`
+			}
+		}
+		text += `\n`
+	}
+	if (parsed.synonyms !== undefined) {
+		text += `🧐 *近义*\n`
+		for (let { word, meaning } of parsed.synonyms) {
+			if (Array.isArray(meaning)) {
+				text += `- _${word}_ ${meaning.join(",")}\n`
+			}
+		}
+		text += `\n`
+	}
+	if (parsed.homophones !== undefined) {
+		text += `🤔 *形似*\n`
+		for (let { word, meaning } of parsed.homophones) {
+			if (Array.isArray(meaning)) {
+				text += `- _${word}_ ${meaning.join(",")}\n`
+			}
+		}
+		text += `\n`
+	}
+	return text
+}
+
+export const _analyze = async (
 	inj: Injector, text: string, chat_id: number,
 	message_id: number, reply_to_message_id: number,
 ) => {
@@ -203,9 +262,17 @@ const _analyze = async (
 		if ((!done && chunkText.length % 50 != 0) || chunkText.length == 0) {
 			return
 		}
-		await bot.editMessageText({
-			chat_id, message_id, text: chunkText
-		})
+		try {
+			// replace [] with [[]] to avoid TOML parse fail
+			const content = chunkText.replaceAll("[]", "[[]]")
+			const parsed = toml(content) as Analyze
+			const text = gen_md_analyze(parsed)
+			await bot.editMessageText({
+				chat_id, message_id, text, parse_mode: "Markdown"
+			})
+		} catch (error) {
+			console.log(error)
+		}
 	})
 	const voice = await tts.textToSpeech({ text })
 	await bot.sendVoice({
@@ -235,7 +302,7 @@ export const translate = async (
 	if (typ == "word" || typ == "phrase") {
 		await _analyze(inj, text, chat_id, message_id, reply_to_message_id)
 	} else {
-		// FIXME: issue of typ out of range
+		// FIXME: issue of type out of range
 		await _translate(inj, text, chat_id, message_id, reply_to_message_id)
 	}
 	return
