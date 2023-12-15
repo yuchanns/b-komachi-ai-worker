@@ -217,6 +217,19 @@ export const gen_md_analyze = (parsed: Analyze) => {
 		text += `🔍 *词源*\n- ${parsed.origin.etymology}\n`
 		text += `\n`
 	}
+	if (parsed.related !== undefined) {
+		text += `🌱 *词根*\n`
+		if (Array.isArray(parsed.related.roots) && parsed.related.roots.length > 0) {
+			text += `${parsed.related.roots.join(",")}\n`
+		}
+		if (Array.isArray(parsed.related.prefixes) && parsed.related.prefixes.length > 0) {
+			text += `🚪 前缀 [${parsed.related.prefixes.join(",")}]\n`
+		}
+		if (Array.isArray(parsed.related.suffixes) && parsed.related.suffixes.length > 0) {
+			text += `🎓 后缀 [${parsed.related.suffixes.join(",")}]\n`
+		}
+		text += `\n`
+	}
 	if (parsed.derivatives !== undefined) {
 		text += `🤓 *派生*\n`
 		for (let { word, meaning } of parsed.derivatives) {
