@@ -266,10 +266,14 @@ export const _analyze = async (
 			// replace [] with [[]] to avoid TOML parse fail
 			const content = chunkText.replaceAll("[]", "[[]]")
 			const parsed = toml(content) as Analyze
-			const text = gen_md_analyze(parsed)
+			const formatted = gen_md_analyze(parsed)
 			await bot.editMessageText({
-				chat_id, message_id, text, parse_mode: "Markdown"
+				chat_id, message_id, text: formatted, parse_mode: "Markdown"
 			})
+			if (done) {
+				// TTS should use the corrected word
+				text = parsed.word.text
+			}
 		} catch (error) {
 			console.log(error)
 		}
