@@ -1,7 +1,6 @@
 import { Injector } from "../types"
-import { differenciate, promptToAnalyze, promptToTranslate } from "./update"
-import createTelegramBotAPI, { createOpenAIAPI } from "../clients"
-import toml from "markty-toml"
+import { _analyze, differenciate, promptToTranslate } from "./update"
+import createTelegramBotAPI, { createEdgeTTSAPI, createOpenAIAPI } from "../clients"
 
 const env = getMiniflareBindings()
 
@@ -63,24 +62,20 @@ print("hello world")
 })
 
 describe("toml", () => {
-	const ai = createOpenAIAPI({
-		url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
-	})
+	const inj = {
+		ai: createOpenAIAPI({
+			url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
+		}),
+		bot: createTelegramBotAPI(env.ENV_BOT_TOKEN),
+		tts: createEdgeTTSAPI()
+	} as Injector
 	test("parse", async () => {
-		const messages = promptToAnalyze("sophisticated")
-		let chunkText = ""
-		const resp = await ai.chat({
-			messages,
-			temperature: 0.3
-		}, (r, done) => {
-			chunkText += r?.choices[0]?.delta.content ?? ""
-			try {
-				const parsed = toml(chunkText) as Analyze
-				console.log(parsed.word)
-			} catch (error) {
-				console.log(chunkText)
-			}
+		const {
+			result: { message_id },
+		} = await inj.bot.sendMessage({
+			chat_id: env.ENV_CHAT_ID,
+			text: "正在查询，请稍候..."
 		})
-	})
+		await _analyze(inj, "sophisticated", Number(env.ENV_CHAT_ID), message_id, Number(undefined))
+	}, 10000)
 })
-

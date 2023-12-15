@@ -1,5 +1,5 @@
 import createTelegramBotAPI, {
-	Response as BotResponse, createEdgeTTSAPI, createOpenAIAPI
+	createEdgeTTSAPI, createOpenAIAPI
 } from './clients'
 import { Env } from './types'
 import { Hono, Context } from 'hono'
