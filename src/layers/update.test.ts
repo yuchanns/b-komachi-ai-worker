@@ -1,6 +1,7 @@
 import { Injector } from "../types"
-import { _analyze, differenciate, promptToTranslate } from "./update"
+import { _analyze, differenciate } from "./update"
 import createTelegramBotAPI, { createEdgeTTSAPI, createOpenAIAPI } from "../clients"
+import { promptToTranslate } from "./prompts"
 
 const env = getMiniflareBindings()
 

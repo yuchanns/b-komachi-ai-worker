@@ -26,8 +26,8 @@ app.post(WEBHOOK, async (c) => {
 	const update: Update = await c.req.json()
 	if (update.message && isMentioned(update.message)) {
 		const bot = createBot(c)
-		const ai = createOpenAI(c)
 		const tts = createTTS(c)
+		const ai = createOpenAI(c)
 		try {
 			await translate(update.message, { bot, ai, tts })
 		} catch (error) {

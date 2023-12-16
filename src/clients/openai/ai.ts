@@ -24,7 +24,7 @@ const readStream = async (
 	onStream: (buffer: ArrayBuffer) => Promise<void>,
 ) => {
 	while (true) {
-		const { value, done } = await reader.read();
+		const { value, done } = await reader.read()
 		if (done) {
 			return
 		}

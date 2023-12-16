@@ -27,6 +27,8 @@ jobs:
           ENV_AZURE_API_VERSION
           ENV_AZURE_TTS_ENDPOINT
           ENV_AZURE_TTS_KEY
+          ENV_GEMINI_API_KEY
+          ENV_AI_BACKEND
       env:
         ENV_BOT_TOKEN: ${{ secrets.ENV_BOT_TOKEN }}
         ENV_BOT_SECRET: ${{ secrets.ENV_BOT_SECRET }}
@@ -35,3 +37,5 @@ jobs:
         ENV_AZURE_API_VERSION: ${{ secrets.ENV_AZURE_API_VERSION }}
         ENV_AZURE_TTS_ENDPOINT: ${{ secrets.ENV_AZURE_TTS_ENDPOINT }}
         ENV_AZURE_TTS_KEY: ${{ secrets.ENV_AZURE_TTS_KEY }}
+        ENV_GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
+        ENV_AI_BACKEND: ${{ secrets.ENV_AI_BACKEND }}
