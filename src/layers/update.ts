@@ -285,7 +285,7 @@ export const _analyze = async (
 			})
 			if (done) {
 				// TTS should use the corrected word
-				text = parsed.word.text
+				text = parsed.word?.text || text
 			}
 		} catch (error) {
 			console.log(error)
