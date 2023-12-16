@@ -5,8 +5,14 @@ import { Env } from './types'
 import { Hono, Context } from 'hono'
 import { logger } from 'hono/logger'
 import { HTTPException } from 'hono/http-exception'
+import { createGeminiAPI } from './clients/openai/gemini'
 
 export const createOpenAI = (c: Context<Env>) => {
+	if (c.env.ENV_AI_BACKEND.toLowerCase() == "gemini" && c.env.ENV_GEMINI_API_KEY != "") {
+		return createGeminiAPI({
+			apiKey: c.env.ENV_GEMINI_API_KEY
+		})
+	}
 	return createOpenAIAPI({
 		url: c.env.ENV_AZURE_URL,
 		apiVersion: c.env.ENV_AZURE_API_VERSION,

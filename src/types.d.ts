@@ -9,6 +9,8 @@ export type Bindings = {
 	ENV_AZURE_TTS_ENDPOINT: string
 	ENV_AZURE_TTS_KEY: string
 	ENV_CHAT_ID: string
+	ENV_GEMINI_API_KEY: string
+	ENV_AI_BACKEND: string
 }
 
 export type Env = {

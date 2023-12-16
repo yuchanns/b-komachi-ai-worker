@@ -8,6 +8,7 @@
 		"test": "jest --verbose"
 	},
 	"dependencies": {
+		"@google/generative-ai": "^0.1.2",
 		"hono": "^3.11.4",
 		"markty-toml": "^0.1.1"
 	},

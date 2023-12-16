@@ -2,148 +2,7 @@ import toml from "markty-toml"
 import { Message } from "../clients"
 import { Injector } from "../types"
 import { Analyze } from "./types"
-
-const types = ["word", "phrase", "sentence"]
-
-const promptToDifferenciate = (text: string) => {
-	return [
-		{
-			role: "system", content: `作为用户的代表，你需要扮演一个英语文本分类工具，任务是对用户提交的英语文本进行准确分类。`
-				+ `分类标准为以下三类：${JSON.stringify(types)}。你需要对每个输入进行评估，然后将其归入适当的类别。`
-				+ `下面是具体的操作指南：`
-				+ `- 如果输入的是一个单独的单词，你应该回复 "word"。`
-				+ `- 如果输入的是一个词组但不是完整的句子，你应该回复 "phrase"。`
-				+ `- 如果输入的是一个完整的句子，你应该回复 "sentence"。`
-				+ `请确保你的回答简洁明了，直接给出分类结果，不需要提供额外的解释或评论。下面是几个例子来帮助你理解任务：`
-				+ `- 输入: prevalent`
-				+ `  你的输出应该是: word`
-				+ `- 输入: he is a boy`
-				+ `  你的输出应该是: sentence`
-				+ `- 输入: real estate`
-				+ `  你的输出应该是: phrase`
-				+ `请遵循这些指南，确保每次回复都精准无误。`
-		},
-		{ role: "assistant", content: `好的，我明白了，请给我输入。` },
-		{
-			role: "user", content: `输入: ${text}: `
-		}
-	]
-}
-
-export const promptToTranslate = (text: string) => {
-	return [
-		{
-			role: "system", content: `你现在是一个高级英语翻译引擎，负责将用户提供的英文句子进行翻译，并按照以下明确的步骤来操作：`
-				+ `1. 直接对句子进行翻译，不需要提供任何额外的解释或说明。`
-				+ `2. 如果用户提供的句子存在语法错误，应自动修正为你认为最可能正确的语法形式，并且无需向用户指出拼写错误。`
-				+ `3. 列举句子当中使用的所有语法和句式，并且为每个句式提供至少一个中英文双语的例句，确保整体提供至少三个例句。`
-				+ `在执行这些指令时，请确保你提供的翻译内容既精确又全面，并且以清晰、组织良好的 toml 格式来展示所有信息。`
-				+ `例如:`
-				+ `输入: The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours.`
-				+ `你的输出应该是:`
-				+ `[sentence]`
-				+ `origin = "The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours."`
-				+ `text = "那个小女孩哭得伤心欲绝，当我跟她说话时，她说她很难过，因为两个小时没见到她妈妈了。"`
-				+ `[[grammar]]`
-				+ `type = "名词短语"`
-				+ `text = "The little girl"`
-				+ `example_sentence = "The tall boy with the red hat"`
-				+ `example_translation = "戴着红帽子的高个男孩"`
-				+ `[[grammar]]`
-				+ `type = "定语从句"`
-				+ `text = "who is crying as if her heart would break"`
-				+ `example_sentence = "which is known for its beautiful beaches"`
-				+ `example_translation = "以其美丽的海滩而闻名"`
-				+ `[[grammar]]`
-				+ `type = "动词短语"`
-				+ `text = "said, when I spoke to her"`
-				+ `example_sentence = "has been working on this project for months"`
-				+ `example_translation = "已经在这个项目上工作了几个月"`
-		},
-		{ role: "assistant", content: "好的，我明白了，请给我输入。" },
-		{ role: "user", content: `输入: ${text} ` }
-	]
-}
-
-export const promptToAnalyze = (text: string) => {
-	return [
-		{
-			role: "system", content: `你现在是一个高级英语翻译引擎，负责将用户提供的英文单词进行翻译，并按照以下明确的步骤来操作：`
-				+ `1. 直接对单词进行翻译，不需要提供任何额外的解释或说明。`
-				+ `2. 如果用户提供的单词存在拼写错误，应自动修正为你认为最可能正确的单词形式，并且无需向用户指出拼写错误。`
-				+ `3. 你需要提供其原始形态，并附上相应的美式音标。`
-				+ `4. 列举单词的所有含义，包括词性，并且为每个含义提供至少一个中英文双语的例句，确保整体提供至少三个例句。`
-				+ `5. 罗列单词相关的词根、前缀和后缀。`
-				+ `6. 提供与该单词相关的派生词。`
-				+ `7. 列出单词的近义词。`
-				+ `8. 列出形似单词。`
-				+ `在执行这些指令时，请确保你提供的翻译内容既精确又全面，并且以清晰、组织良好的 toml 格式来展示所有信息。`
-				+ `例如:`
-				+ `输入: like`
-				+ `你的输出应该是:`
-				+ `[word]`
-				+ `text = "like"`
-				+ `[pronunciation]`
-				+ `ipa = "/laɪk/"`
-				+ `[[meaning]]`
-				+ `part_of_speech = "v."`
-				+ `definitions = [`
-				+ `"喜欢",`
-				+ `"喜爱",`
-				+ `]`
-				+ `[[meaning]]`
-				+ `part_of_speech = "prep."`
-				+ `definitions = [`
-				+ `"像",`
-				+ `"如同",`
-				+ `]`
-				+ `[[example]]`
-				+ `sentence = "I really like chocolate ice cream."`
-				+ `translation = "我真的很喜欢巧克力冰淇淋"`
-				+ `[[example]]`
-				+ `sentence = "She looks like her mother."`
-				+ `translation = "她长得像她的母亲"`
-				+ `[[example]]`
-				+ `sentence = "I like your idea"`
-				+ `translation = "我喜欢你的想法"`
-				+ `[origin]`
-				+ `etymology = "源自古英语“lician”，意为“爱、喜欢”。"`
-				+ `[related]`
-				+ `prefixes = []`
-				+ `suffixes = ["-ly"]`
-				+ `roots = ["lik-"]`
-				+ `[[derivatives]]`
-				+ `word = "dislike"`
-				+ `meaning = ["不喜欢", "厌恶"]`
-				+ `[[derivatives]]`
-				+ `word = "alike"`
-				+ `meaning = ["相似的", "相同的", "相似地", "相同地"]`
-				+ `[[derivatives]]`
-				+ `word = "unlike"`
-				+ `meaning = ["不像", "与...不同"]`
-				+ `[[synonyms]]`
-				+ `word = "love"`
-				+ `meaning = ["爱", "情感"]`
-				+ `[[synonyms]]`
-				+ `word = "enjoy"`
-				+ `meaning = ["享受", "喜爱"]`
-				+ `[[synonyms]]`
-				+ `word = "adore"`
-				+ `meaning = ["崇拜", "爱慕"]`
-				+ `[[synonyms]]`
-				+ `word = "appreciate"`
-				+ `meaning = ["欣赏", "感激", "重视"]`
-				+ `[[homophones]]`
-				+ `word = "hike"`
-				+ `meaning = ["远足", "徒步"]`
-				+ `[[homophones]]`
-				+ `word = "bike"`
-				+ `meaning = ["自行车"]`
-		},
-		{ role: "assistant", content: "好的，我明白了，请给我输入。" },
-		{ role: "user", content: `输入: ${text} ` }
-	]
-}
+import { promptToAnalyze, promptToDifferenciate, promptToTranslate, types } from "./prompts"
 
 export const isMentioned = (m: Message) => {
 	for (const entity of m.entities ?? []) {
@@ -276,8 +135,11 @@ export const _analyze = async (
 			return
 		}
 		try {
-			// replace [] with [[]] to avoid TOML parse fail
-			const content = chunkText.replaceAll("[]", "[[]]")
+			const content = chunkText
+				// OpenAI: replace [] with [[]] to avoid TOML parse fail
+				.replaceAll("[]", "[[]]")
+				// Gemini: replace ,] with ] to avoid TOML parse fail
+				.replaceAll(",]", "]")
 			const parsed = toml(content) as Analyze
 			const formatted = gen_md_analyze(parsed)
 			await bot.editMessageText({
