@@ -52,10 +52,10 @@ const _translate = async (
 export const gen_md_analyze = (parsed: Analyze) => {
 	let text = ""
 	if (parsed.word !== undefined) {
-		text += `*${parsed.word.text}*\n\n`
+		text += `📚 *${parsed.word.text}*\n\n`
 	}
 	if (parsed.pronunciation !== undefined) {
-		text += `🗣️ *音标* _${parsed.pronunciation.ipa}_\n`
+		text += `🎧 *音标* _${parsed.pronunciation.ipa}_\n`
 	}
 	if (parsed.meaning !== undefined) {
 		for (let { part_of_speech, definitions } of parsed.meaning) {
