@@ -4,8 +4,7 @@ A sophisticated Telegram bot Vocabulary Assistant deployed on Cloudflare Worker.
 
 AzureOpenAI/Gemini Pro + EdgeTTS 🗣️
 
-
-https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/f5ca0820-00b9-4a4e-aa45-70d67602da7b
+https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a00-b8b0-447a7f88cf6c
 
 ### 🚀 Features
 - [x] 📚 Vocabulary
@@ -36,6 +35,8 @@ Users must provide the following environment variables within GitHub's Secrets -
 |ENV_AI_BACKEND|Specify Which AI Backend To Use|Optional: `Azure`, `Gemini`||
 
 Subsequently, deploy the worker by triggering Github Actions.
+
+At the end, visit `https://${your.domain.com}/hook/registerWebhook` to register hooks for Telegram Bot.
 
 🔗 Useful references:
 - [Telegram Bot Father](https://core.telegram.org/bots/tutorial)
