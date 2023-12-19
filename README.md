@@ -26,6 +26,8 @@ Users must provide the following environment variables within GitHub's Secrets -
 
 |Name|Description|Example|
 |---|---|---|
+|CLOUDFLARE_ACOUNT_ID|[Documentation](https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/)||
+|CLOUDFLARE_API_TOKEN|[Documentation](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/)||
 |ENV_AZURE_URL|Azure OpenAI Deployment Endpoint|https://yuchanns-openai.openai.azure.com/openai/deployments/gpt35|
 |ENV_AZURE_API_KEY|Azure OpenAI API Key||
 |ENV_AZURE_API_VERSION|Azure OpenAI API Version|2023-09-01-preview|
