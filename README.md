@@ -2,7 +2,7 @@
 
 A sophisticated Telegram bot Vocabulary Assistant deployed on Cloudflare Worker.
 
-AzureOpenAI/Gemini Pro + EdgeTTS 🗣️
+OpenAI/AzureOpenAI/Gemini Pro + EdgeTTS 🗣️
 
 https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a00-b8b0-447a7f88cf6c
 
@@ -18,8 +18,6 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [ ] 🧠 Efficient retention through grouping common words.
 - [ ] 🔮 More features coming soon...
 
-**Note**: Unfortunately, OpenAI is not supported at the moment due to the absence of a subscription. However, PRs are warmly welcomed.
-
 ## 🛠️ Deploy
 
 Users must provide the following environment variables within GitHub's Secrets - go to "Settings -> Secrets":
@@ -34,7 +32,10 @@ Users must provide the following environment variables within GitHub's Secrets -
 |ENV_BOT_SECRET|Telegram Bot Verification Secret, Random Generate From `A-Z, a-z, 0-9, _ and -`||
 |ENV_BOT_TOKEN|Telegram Bot Token||
 |ENV_GEMINI_API_KEY|Google Gemini Pro API Key||
-|ENV_AI_BACKEND|Specify Which AI Backend To Use|Optional: `Azure`, `Gemini`||
+|ENV_OPENAI_API_KEY|OpenAI API Key||
+|ENV_OPENAI_URL|Optional|https://api.openai.com|
+|ENV_OPENAI_MODEL|Optional|gpt-3.5-turbo|
+|ENV_AI_BACKEND|Specify Which AI Backend To Use|Optional: `Azure`, `Gemini`, `OpenAI`|
 
 Subsequently, deploy the worker by triggering Github Actions.
 
