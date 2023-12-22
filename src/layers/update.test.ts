@@ -1,13 +1,13 @@
 import { Injector } from "../types"
 import { _analyze, differenciate } from "./update"
-import createTelegramBotAPI, { createEdgeTTSAPI, createOpenAIAPI } from "../clients"
+import createTelegramBotAPI, { createEdgeTTSAPI, createAzureAPI } from "../clients"
 import { promptToTranslate } from "./prompts"
 
 const env = getMiniflareBindings()
 
 describe("ai", () => {
 	const inj = {
-		ai: createOpenAIAPI({
+		ai: createAzureAPI({
 			url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
 		})
 	} as Injector
@@ -23,7 +23,7 @@ describe("ai", () => {
 	test("sentence", async () => {
 		const typ = await differenciate(inj, "It will give you lowered video resolutions")
 		expect(typ).toBe("sentence")
-	})
+	}, 100000)
 	test("prompt_translate", async () => {
 		const messages = promptToTranslate("I saw a guy throwing red wine at a woman during an argument while I was eating food in the locomotive restaurant.")
 		const params = {
@@ -33,7 +33,7 @@ describe("ai", () => {
 		const response = await inj.ai.chat(params)
 		console.log(response?.
 			choices[0]?.message.content)
-	})
+	}, 100000)
 })
 
 describe("bot", () => {
@@ -64,7 +64,7 @@ print("hello world")
 
 describe("toml", () => {
 	const inj = {
-		ai: createOpenAIAPI({
+		ai: createAzureAPI({
 			url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
 		}),
 		bot: createTelegramBotAPI(env.ENV_BOT_TOKEN),

@@ -1,11 +1,10 @@
 import createTelegramBotAPI, {
-	createEdgeTTSAPI, createOpenAIAPI
+	createEdgeTTSAPI, createAzureAPI, createGeminiAPI, createOpenAIAPI
 } from './clients'
 import { Env } from './types'
 import { Hono, Context } from 'hono'
 import { logger } from 'hono/logger'
 import { HTTPException } from 'hono/http-exception'
-import { createGeminiAPI } from './clients/openai/gemini'
 
 export const createOpenAI = (c: Context<Env>) => {
 	if (c.env.ENV_AI_BACKEND.toLowerCase() == "gemini" && c.env.ENV_GEMINI_API_KEY != "") {
@@ -13,7 +12,22 @@ export const createOpenAI = (c: Context<Env>) => {
 			apiKey: c.env.ENV_GEMINI_API_KEY
 		})
 	}
-	return createOpenAIAPI({
+	if (c.env.ENV_AI_BACKEND.toLowerCase() == "openai" && c.env.ENV_OPENAI_API_KEY != "") {
+		let url = c.env.ENV_OPENAI_URL
+		if (!url) {
+			url = "https://api.openai.com"
+		}
+		let model = c.env.ENV_OPENAI_MODEL
+		if (!model) {
+			model = "gpt-3.5-turbo"
+		}
+		return createOpenAIAPI({
+			url,
+			apiKey: c.env.ENV_OPENAI_API_KEY,
+			model
+		})
+	}
+	return createAzureAPI({
 		url: c.env.ENV_AZURE_URL,
 		apiVersion: c.env.ENV_AZURE_API_VERSION,
 		apiKey: c.env.ENV_AZURE_API_KEY

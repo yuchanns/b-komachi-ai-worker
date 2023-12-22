@@ -3,7 +3,7 @@ export const types = ["word", "phrase", "sentence"]
 export const promptToDifferenciate = (text: string) => {
 	return [
 		{
-			role: "system", content: `作为用户的代表，你需要扮演一个英语文本分类工具，任务是对用户提交的英语文本进行准确分类。\n`
+			role: "user", content: `作为用户的代表，你需要扮演一个英语文本分类工具，任务是对用户提交的英语文本进行准确分类。\n`
 				+ `分类标准为以下三类：${JSON.stringify(types)}。你需要对每个输入进行评估，然后将其归入适当的类别。\n`
 				+ `下面是具体的操作指南：\n`
 				+ `- 如果输入的是一个单独的单词，你应该回复 "word"。\n`
@@ -28,7 +28,7 @@ export const promptToDifferenciate = (text: string) => {
 export const promptToTranslate = (text: string) => {
 	return [
 		{
-			role: "system", content: `你现在是一个高级英语翻译引擎，负责将用户提供的英文句子进行翻译，并按照以下明确的步骤来操作：\n`
+			role: "user", content: `你现在是一个高级英语翻译引擎，负责将用户提供的英文句子进行翻译，并按照以下明确的步骤来操作：\n`
 				+ `1. 直接对句子进行翻译，不需要提供任何额外的解释或说明。\n`
 				+ `2. 如果用户提供的句子存在语法错误，应自动修正为你认为最可能正确的语法形式，并且无需向用户指出拼写错误。\n`
 				+ `3. 列举句子当中使用的所有语法和句式，并且为每个句式提供至少一个中英文双语的例句，确保整体提供至少三个例句。\n`
@@ -63,7 +63,7 @@ export const promptToTranslate = (text: string) => {
 export const promptToAnalyze = (text: string) => {
 	return [
 		{
-			role: "system", content: `你现在是一个高级英语翻译引擎，负责将用户提供的英文单词进行翻译，并按照以下明确的步骤来操作：\n`
+			role: "user", content: `你现在是一个高级英语翻译引擎，负责将用户提供的英文单词进行翻译，并按照以下明确的步骤来操作：\n`
 				+ `1. 直接对单词进行翻译，不需要提供任何额外的解释或说明。\n`
 				+ `2. 如果用户提供的单词存在拼写错误，应自动修正为你认为最可能正确的单词形式，并且无需向用户指出拼写错误。\n`
 				+ `3. 你需要提供其原始形态，并附上相应的美式音标。\n`
