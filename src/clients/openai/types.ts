@@ -38,6 +38,7 @@ export type Message = {
 }
 
 export type Payloads = {
+	model?: string
 	messages: Message[]
 	temperature: number
 	top_p?: number

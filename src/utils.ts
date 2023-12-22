@@ -1,5 +1,5 @@
 import createTelegramBotAPI, {
-	createEdgeTTSAPI, createOpenAIAPI
+	createEdgeTTSAPI, createAzureAPI
 } from './clients'
 import { Env } from './types'
 import { Hono, Context } from 'hono'
@@ -13,7 +13,7 @@ export const createOpenAI = (c: Context<Env>) => {
 			apiKey: c.env.ENV_GEMINI_API_KEY
 		})
 	}
-	return createOpenAIAPI({
+	return createAzureAPI({
 		url: c.env.ENV_AZURE_URL,
 		apiVersion: c.env.ENV_AZURE_API_VERSION,
 		apiKey: c.env.ENV_AZURE_API_KEY

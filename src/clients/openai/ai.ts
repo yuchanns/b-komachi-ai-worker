@@ -32,7 +32,7 @@ const readStream = async (
 	}
 }
 
-const readChatStream = async (
+export const readChatStream = async (
 	reader: ReadableStreamDefaultReader<ArrayBuffer>,
 	onStream: (buffer: ChunkResponse | undefined, done: boolean) => Promise<void>,
 ) => {
@@ -68,7 +68,7 @@ const readChatStream = async (
 
 }
 
-export const createOpenAIAPI = (params: {
+export const createAzureAPI = (params: {
 	url: string,
 	apiVersion: string,
 	apiKey: string
