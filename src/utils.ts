@@ -1,4 +1,5 @@
-import createTelegramBotAPI, {
+import { createTelegramBotAPI } from '@yuchanns/flamebot'
+import {
 	createEdgeTTSAPI, createAzureAPI, createGeminiAPI, createOpenAIAPI
 } from './clients'
 import { Env } from './types'

@@ -10,9 +10,9 @@
     ],
     "types": [
       "@cloudflare/workers-types",
-			 "jest"
+      "jest"
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
-  },
+  }
 }
