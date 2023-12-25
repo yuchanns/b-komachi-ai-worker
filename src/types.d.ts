@@ -1,4 +1,5 @@
-import { EdgeTTSAPI, OpenAIAPI, TelegramBotAPI } from "./clients"
+import { TelegramBotAPI } from "@yuchanns/flamebot/dist/types"
+import { EdgeTTSAPI, OpenAIAPI } from "./clients"
 
 export type Bindings = {
 	ENV_BOT_TOKEN: string
