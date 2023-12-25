@@ -3,7 +3,7 @@ import { translate } from "../layers"
 import { Env, Injector } from "../types"
 import { createBot, createTTS, createOpenAI } from "../utils"
 import { authorize } from "./middlewares"
-import { Chat, Message } from "../clients"
+import { Chat, Message } from "@yuchanns/flamebot/dist/types"
 
 const app = new Hono<Env>().use("*", authorize())
 

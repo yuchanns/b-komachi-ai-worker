@@ -1,8 +1,8 @@
 import toml from "markty-toml"
-import { Message } from "../clients"
 import { Injector } from "../types"
 import { Analyze } from "./types"
 import { promptToAnalyze, promptToDifferenciate, promptToTranslate, types } from "./prompts"
+import { Message } from "@yuchanns/flamebot/dist/types"
 
 export const isMentioned = (m: Message) => {
 	for (const entity of m.entities ?? []) {
