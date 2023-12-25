@@ -3,7 +3,7 @@ import { WEBHOOK, HOOK_PREFIX } from "../consts"
 import { Env } from "../types"
 import { createBot, createOpenAI, createTTS } from "../utils"
 import { authorize } from "./middlewares"
-import { isMentioned, translate } from "../layers"
+import { translate } from "../layers"
 import { Update } from "@yuchanns/flamebot/dist/types"
 
 const app = new Hono<Env>().use(WEBHOOK, authorize())
@@ -24,7 +24,7 @@ app.get('/unRegisterWebhook', async (c) => {
 
 app.post(WEBHOOK, async (c) => {
 	const update: Update = await c.req.json()
-	if (update.message && isMentioned(update.message)) {
+	if (update.message?.entities?.some((val) => val.type == 'mention')) {
 		const bot = createBot(c)
 		const tts = createTTS(c)
 		const ai = createOpenAI(c)
