@@ -24,8 +24,11 @@ app.get('/unRegisterWebhook', async (c) => {
 
 app.post(WEBHOOK, async (c) => {
 	const update: Update = await c.req.json()
-	if (update.message?.entities?.some((val) => val.type == 'mention')) {
-		const bot = createBot(c)
+	const bot = createBot(c)
+	const me = await bot.getMe()
+	if (update.message?.entities?.
+		some((val) => val.type == 'mention') &&
+		update.message.text?.includes(`@${me.result.username}`)) {
 		const tts = createTTS(c)
 		const ai = createOpenAI(c)
 		try {
