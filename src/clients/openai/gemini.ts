@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import { ChatResponse, ChunkResponse, OpenAIAPI } from "./types"
+import { ChatResponse, ChunkResponse, OpenAIAPI } from "@yuchanns/flameai"
 
 export const createGeminiAPI = (params: {
 	apiKey: string,

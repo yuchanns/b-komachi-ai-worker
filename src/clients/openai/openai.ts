@@ -1,5 +1,4 @@
-import { readChatStream } from "./ai"
-import { OpenAIAPI, Payloads } from "./types"
+import { OpenAIAPI, Payloads, readChatStream } from "@yuchanns/flameai"
 
 const makeRequest = (params: {
 	url: string

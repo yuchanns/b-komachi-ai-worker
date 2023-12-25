@@ -1,11 +1,12 @@
 import { createTelegramBotAPI } from '@yuchanns/flamebot'
 import {
-	createEdgeTTSAPI, createAzureAPI, createGeminiAPI, createOpenAIAPI
+	createEdgeTTSAPI, createGeminiAPI, createOpenAIAPI
 } from './clients'
 import { Env } from './types'
 import { Hono, Context } from 'hono'
 import { logger } from 'hono/logger'
 import { HTTPException } from 'hono/http-exception'
+import { createAzureAPI } from '@yuchanns/flameai'
 
 export const createOpenAI = (c: Context<Env>) => {
 	if (c.env.ENV_AI_BACKEND.toLowerCase() == "gemini" && c.env.ENV_GEMINI_API_KEY != "") {

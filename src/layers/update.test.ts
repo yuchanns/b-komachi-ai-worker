@@ -1,8 +1,9 @@
 import { Injector } from "../types"
 import { _analyze, differenciate } from "./update"
-import { createEdgeTTSAPI, createAzureAPI } from "../clients"
+import { createEdgeTTSAPI } from "../clients"
 import { promptToTranslate } from "./prompts"
 import { createTelegramBotAPI } from "@yuchanns/flamebot"
+import { createAzureAPI } from "@yuchanns/flameai"
 
 const env = getMiniflareBindings()
 

@@ -8,6 +8,9 @@ dependencies:
   '@google/generative-ai':
     specifier: ^0.1.2
     version: 0.1.2
+  '@yuchanns/flameai':
+    specifier: ^0.0.1
+    version: 0.0.1
   '@yuchanns/flamebot':
     specifier: ^0.0.5
     version: 0.0.5
@@ -1422,6 +1425,10 @@ packages:
     dependencies:
       '@types/yargs-parser': 21.0.3
     dev: true
+
+  /@yuchanns/flameai@0.0.1:
+    resolution: {integrity: sha512-iWIrh2n/k0L1vKMqSnqCIrf3NPo6emge5xW4ms/+1H/5wWHk05Ek4XcGdwC2hwLnBd14WOAbWVmYLwsqdZaDRA==}
+    dev: false
 
   /@yuchanns/flamebot@0.0.5:
     resolution: {integrity: sha512-febtr3RWIIM/9ZNXYt0ttFbSKXpskAJFHlBVMNkeMEaZ1bddUICpxel0/eCnvbCFFLYITimYbILfFHQtiut54Q==}
