@@ -147,8 +147,9 @@ export const _analyze = async (
 	})
 	await Promise.all(texts.map(async (text) => {
 		const voice = await tts.textToSpeech({ text })
+		const caption = text
 		await bot.sendVoice({
-			chat_id, reply_to_message_id, voice
+			chat_id, reply_to_message_id, voice, caption
 		})
 	}))
 }
