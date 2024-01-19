@@ -119,6 +119,7 @@ export const _analyze = async (
 		temperature: 0.3
 	}
 	let chunkText = ""
+	let parsed: Analyze = {}
 	await ai.chat(params, async (r, done) => {
 		chunkText += r?.choices[0]?.delta?.content ?? ""
 		if ((!done && chunkText.length % 50 != 0) || chunkText.length == 0) {
@@ -130,23 +131,26 @@ export const _analyze = async (
 				.replaceAll("[]", "[[]]")
 				// Gemini: replace ,] with ] to avoid TOML parse fail
 				.replaceAll(",]", "]")
-			const parsed = toml(content) as Analyze
+			parsed = toml(content) as Analyze
 			const formatted = gen_md_analyze(parsed)
 			await bot.editMessageText({
 				chat_id, message_id, text: formatted, parse_mode: "Markdown"
 			})
-			if (done) {
-				// TTS should use the corrected word
-				text = parsed.word?.text || text
-			}
 		} catch (error) {
 			console.log(error)
 		}
 	})
-	const voice = await tts.textToSpeech({ text })
-	await bot.sendVoice({
-		chat_id, reply_to_message_id, voice,
+	// TTS should use the corrected word
+	const texts = [parsed.word?.text || text]
+	parsed.example?.forEach(({ sentence }) => {
+		texts.push(sentence)
 	})
+	await Promise.all(texts.map(async (text) => {
+		const voice = await tts.textToSpeech({ text })
+		await bot.sendVoice({
+			chat_id, reply_to_message_id, voice
+		})
+	}))
 }
 
 export const translate = async (
