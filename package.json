@@ -9,8 +9,8 @@
 	},
 	"dependencies": {
 		"@google/generative-ai": "^0.1.2",
-		"@yuchanns/flameai": "^0.0.1",
-		"@yuchanns/flamebot": "^0.0.5",
+		"@yuchanns/flameai": "^0.0.2",
+		"@yuchanns/flamebot": "^0.0.9",
 		"hono": "^3.11.4",
 		"markty-toml": "^0.1.1"
 	},
