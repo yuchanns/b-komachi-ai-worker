@@ -141,13 +141,13 @@ export const _analyze = async (
 		}
 	})
 	// TTS should use the corrected word
-	const texts = [parsed.word?.text || text]
-	parsed.example?.forEach(({ sentence }) => {
-		texts.push(sentence)
+	const texts = [{ sentence: parsed.word?.text || text, translation: "" }]
+	parsed.example?.forEach(({ sentence, translation }) => {
+		texts.push({ sentence, translation: `(${translation})` })
 	})
-	await Promise.all(texts.map(async (text) => {
-		const voice = await tts.textToSpeech({ text })
-		const caption = text
+	await Promise.all(texts.map(async ({ sentence, translation }) => {
+		const voice = await tts.textToSpeech({ text: sentence })
+		const caption = `${sentence} ${translation}`
 		await bot.sendVoice({
 			chat_id, reply_to_message_id, voice, caption
 		})
