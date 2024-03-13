@@ -9,11 +9,11 @@ dependencies:
     specifier: ^0.1.2
     version: 0.1.2
   '@yuchanns/flameai':
-    specifier: ^0.0.2
-    version: 0.0.2
+    specifier: ^0.0.3
+    version: 0.0.3
   '@yuchanns/flamebot':
-    specifier: ^0.0.9
-    version: 0.0.9
+    specifier: ^0.0.10
+    version: 0.0.10
   hono:
     specifier: ^3.11.4
     version: 3.11.4
@@ -1426,12 +1426,12 @@ packages:
       '@types/yargs-parser': 21.0.3
     dev: true
 
-  /@yuchanns/flameai@0.0.2:
-    resolution: {integrity: sha512-wk4MglaXJk2+qeMFm+pjWNOnCFDRYO3oi5ZrtrcLQ7uZLz5gAaTN5QZgr7223PXhENtqLqkPRjlBVtMAkqgwFw==}
+  /@yuchanns/flameai@0.0.3:
+    resolution: {integrity: sha512-PtaMlI28TeSzpNbsP/AwjIsBYDU5e142g5l2hKVPPpnPiCPEPet763gUrnNqUjrg6MpHN1o0P3wwHZTlraVfVw==}
     dev: false
 
-  /@yuchanns/flamebot@0.0.9:
-    resolution: {integrity: sha512-N8EXtD9bPJHgBJKwPWTsCYI20i4Dzlntm78/vxtQfgMpRk1KizeNZ1BsBrZXu1WEti/oeT/c9JnQphGe3t8uag==}
+  /@yuchanns/flamebot@0.0.10:
+    resolution: {integrity: sha512-K4L6wd6IrIAGPOh76nxIyoLZpVXqxJ+5+/mFGSHFtdPTWHkpd4iHKNexGZ9MbJk3b3co60RnlvcID4k9jzYEMw==}
     dev: false
 
   /acorn-walk@8.3.0:
