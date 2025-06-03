@@ -5,7 +5,7 @@ const makeRequest = (params: {
 	apiKey: string
 	body: Payloads
 }) => {
-	const u = new URL(`${params.url}/v1/chat/completions?path=v1&path=chat&path=completions`)
+	const u = new URL(`${params.url}/chat/completions?path=v1&path=chat&path=completions`)
 	const body = JSON.stringify(params.body)
 	return new Request(u, {
 		method: "POST",
