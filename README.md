@@ -12,12 +12,47 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [x] 🎧 Pronunciation
 - [x] 💻 Stream Output
 - [x] 🤖 Multiple AI support(Azure OpenAI, Gemini Pro...)
-- [ ] 📝 Daily quizzes based on user-specific vocabulary.
+- [x] 📝 Daily quizzes based on user-specific vocabulary.
 - [ ] 👂 Review mode for listening to speech and selecting the answer.
 - [ ] 🌎 Support for learning multiple languages.
 - [ ] 🤔 Identify unfamiliar words within sentences.
 - [ ] 🧠 Efficient retention through grouping common words.
 - [ ] 🔮 More features coming soon...
+
+## 📖 Usage
+
+### Vocabulary Lookup
+
+Mention the bot in a group or private chat with a word or phrase:
+
+```
+@your_bot_name sophisticated
+```
+
+The bot will:
+
+- Analyze the word/phrase
+- Provide pronunciation (IPA)
+- Show meanings, examples, etymology, derivatives, synonyms, and related words
+- Send voice pronunciation
+- Automatically store the word in your vocabulary history
+
+### Daily Quiz
+
+Start a quiz based on your vocabulary history:
+
+```
+/quiz
+```
+
+The bot will:
+
+- Generate multiple-choice questions from your vocabulary words
+- Present each question with 4 answer options as interactive buttons
+- Provide instant feedback on correct/incorrect answers
+- Show your final score after completing all questions
+
+Note: You need to query at least a few words before using the quiz feature.
 
 ## 🛠️ Deploy
 
@@ -37,6 +72,33 @@ Users must provide the following environment variables within GitHub's Secrets -
 | ENV_OPENAI_URL        | Optional                                                                                         | https://api.openai.com                                            |
 | ENV_OPENAI_MODEL      | Optional                                                                                         | gpt-3.5-turbo                                                     |
 | ENV_AI_BACKEND        | Specify Which AI Backend To Use                                                                  | Optional: `Azure`, `Gemini`, `OpenAI`                             |
+
+### D1 Database Setup
+
+Before deploying, create a D1 database for vocabulary storage:
+
+1. Create D1 database via Cloudflare dashboard or CLI:
+
+    ```bash
+    wrangler d1 create b-komachi-vocabulary
+    ```
+
+2. Update `wrangler.toml` with your D1 database ID:
+
+    ```toml
+    [[d1_databases]]
+    binding = "DB"
+    database_name = "b-komachi-vocabulary"
+    database_id = "your-database-id"
+    ```
+
+3. Initialize the database schema:
+
+    ```bash
+    wrangler d1 execute b-komachi-vocabulary --remote --file=schema.sql
+    ```
+
+    **Note**: This command is safe to run multiple times. It will create tables if they don't exist, or add missing columns if upgrading from an older version. Some error messages about duplicate columns are expected and can be ignored when migrating.
 
 Subsequently, deploy the worker by triggering Github Actions.
 

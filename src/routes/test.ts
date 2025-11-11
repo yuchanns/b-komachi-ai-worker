@@ -3,7 +3,7 @@ import { translate } from "../lib"
 import { Bindings, Injector } from "../bindings"
 import { createBot, createTTS, createAI } from "../services"
 import { authorize } from "../middleware"
-import { Chat, Message } from "@yuchanns/flamebot/dist/types"
+import { Chat, Message } from "../services/telegram"
 
 const test = new Hono<{ Bindings: Bindings }>()
 
