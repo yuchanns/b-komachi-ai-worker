@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeAll } from 'vitest';
+import { env } from 'cloudflare:test';
 import toml from 'markty-toml';
 import { differenciate, promptToAnalyze, promptToTranslate } from '../../lib';
 import { createGeminiAPI } from './gemini';
@@ -9,16 +10,16 @@ let ai: ReturnType<typeof createGeminiAPI>;
 
 beforeAll(() => {
 ai = createGeminiAPI({
-apiKey: process.env.ENV_GEMINI_API_KEY!,
+apiKey: env.ENV_GEMINI_API_KEY,
 });
 });
 
-test.skip('non_stream', async () => {
+test('non_stream', async () => {
 const typ = await differenciate({ ai } as Injector, 'sophisticated');
 console.log(typ);
 expect(typ).toBe('word');
 });
-test.skip('prompt_translate', async () => {
+test('prompt_translate', async () => {
 const messages = promptToAnalyze('sophisticated');
 const params = {
 messages,

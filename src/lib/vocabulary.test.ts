@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeAll } from 'vitest';
+import { env } from 'cloudflare:test';
 import { Injector } from '../bindings';
 import { _analyze, differenciate } from './vocabulary';
 import { createEdgeTTSAPI } from '../services';
@@ -12,22 +13,22 @@ let inj: Injector;
 beforeAll(() => {
 inj = {
 ai: createAzureAPI({
-url: process.env.ENV_AZURE_URL!,
-apiVersion: process.env.ENV_AZURE_API_VERSION!,
-apiKey: process.env.ENV_AZURE_API_KEY!,
+url: env.ENV_AZURE_URL,
+apiVersion: env.ENV_AZURE_API_VERSION,
+apiKey: env.ENV_AZURE_API_KEY,
 }),
 } as Injector;
 });
 
-test.skip('word', async () => {
+test('word', async () => {
 const typ = await differenciate(inj, 'sophisticated');
 expect(typ).toBe('word');
 });
-test.skip('phrase', async () => {
+test('phrase', async () => {
 const typ = await differenciate(inj, 'writing paper');
 expect(typ).toBe('phrase');
 });
-test.skip(
+test(
 'sentence',
 async () => {
 const typ = await differenciate(inj, 'It will give you lowered video resolutions');
@@ -35,7 +36,7 @@ expect(typ).toBe('sentence');
 },
 100000
 );
-test.skip(
+test(
 'prompt_translate',
 async () => {
 const messages = promptToTranslate(
@@ -56,16 +57,16 @@ describe('bot', () => {
 let bot: ReturnType<typeof createTelegramBotAPI>;
 
 beforeAll(() => {
-bot = createTelegramBotAPI(process.env.ENV_BOT_TOKEN!);
+bot = createTelegramBotAPI(env.ENV_BOT_TOKEN);
 });
 
-test.skip('getMe', async () => {
+test('getMe', async () => {
 const resp = await bot.getMe();
 console.log(resp);
 });
-test.skip('markdown', async () => {
+test('markdown', async () => {
 await bot.sendMessage({
-chat_id: process.env.ENV_CHAT_ID!,
+chat_id: env.ENV_CHAT_ID,
 text: `
 *bold*
 _italic_
@@ -84,7 +85,7 @@ parse_mode: 'MarkdownV2',
 });
 
 describe('tts', () => {
-test.skip('textToSpeech', async () => {
+test('textToSpeech', async () => {
 const tts = createEdgeTTSAPI();
 const audioBlob = await tts.textToSpeech({ text: 'hello' });
 expect(audioBlob).toBeDefined();
@@ -98,25 +99,25 @@ let inj: Injector;
 beforeAll(() => {
 inj = {
 ai: createAzureAPI({
-url: process.env.ENV_AZURE_URL!,
-apiVersion: process.env.ENV_AZURE_API_VERSION!,
-apiKey: process.env.ENV_AZURE_API_KEY!,
+url: env.ENV_AZURE_URL,
+apiVersion: env.ENV_AZURE_API_VERSION,
+apiKey: env.ENV_AZURE_API_KEY,
 }),
-bot: createTelegramBotAPI(process.env.ENV_BOT_TOKEN!),
+bot: createTelegramBotAPI(env.ENV_BOT_TOKEN),
 tts: createEdgeTTSAPI(),
 } as Injector;
 });
 
-test.skip(
+test(
 'parse',
 async () => {
 const {
 result: { message_id },
 } = await inj.bot.sendMessage({
-chat_id: process.env.ENV_CHAT_ID!,
+chat_id: env.ENV_CHAT_ID,
 text: '正在查询，请稍候...',
 });
-await _analyze(inj, 'sophisticated', Number(process.env.ENV_CHAT_ID!), message_id, Number(undefined));
+await _analyze(inj, 'sophisticated', Number(env.ENV_CHAT_ID), message_id, Number(undefined));
 },
 10000
 );
