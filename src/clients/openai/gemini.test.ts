@@ -1,14 +1,19 @@
+import { describe, test, expect, beforeAll } from "vitest"
+import { env } from "cloudflare:test"
 import toml from "markty-toml"
 import { differenciate, promptToAnalyze, promptToTranslate } from "../../layers"
 import { createGeminiAPI } from "./gemini"
 import { Injector } from "../../types"
 
-const env = getMiniflareBindings()
-
 describe("gemini", () => {
-	const ai = createGeminiAPI({
-		apiKey: env.ENV_GEMINI_API_KEY
+	let ai: ReturnType<typeof createGeminiAPI>
+	
+	beforeAll(() => {
+		ai = createGeminiAPI({
+			apiKey: env.ENV_GEMINI_API_KEY
+		})
 	})
+	
 	test("stream", async () => {
 		const messages = promptToAnalyze("prevelent")
 		let text = ""

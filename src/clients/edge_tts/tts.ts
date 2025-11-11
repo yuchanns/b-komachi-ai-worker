@@ -1,24 +1,31 @@
 import { EdgeTTSAPI } from "./types"
-import { generateRandomHex } from "./utils"
+import { generateConnectionId, dateToString, generateSecMsGec } from "./utils"
 
 const TRUSTED_CLIENT_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4"
-const SYNTH_URL = `https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${TRUSTED_CLIENT_TOKEN}`
+const BASE_URL = "api.msedgeservices.com/tts/cognitiveservices"
 const OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3"
 const BINARY_DELIM = "Path:audio\r\n"
+const CHROMIUM_FULL_VERSION = "140.0.3485.14"
+const CHROMIUM_MAJOR_VERSION = CHROMIUM_FULL_VERSION.split(".")[0]
+const SEC_MS_GEC_VERSION = `1-${CHROMIUM_FULL_VERSION}`
 
 const makeConfigRequest = (outputFormat: string) => {
-	return `Content-Type:application/json; charset=utf-8\r\n`
+	const timestamp = dateToString();
+	return `X-Timestamp:${timestamp}\r\n`
+		+ `Content-Type:application/json; charset=utf-8\r\n`
 		+ `Path:speech.config\r\n\r\n`
 		+ `{"context":{"synthesis":{"audio":{"metadataoptions":{`
-		+ `"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},`
+		+ `"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"false"},`
 		+ `"outputFormat":"${outputFormat}"`
-		+ `}}}}\r\n`.trim()
+		+ `}}}}\r\n`
 }
 
 const makeSSMLRequest = (ssml: string) => {
-	const requestId = generateRandomHex()
+	const requestId = generateConnectionId()
+	const timestamp = dateToString()
 	return `X-RequestId:${requestId}\r\n`
 		+ `Content-Type:application/ssml+xml\r\n`
+		+ `X-Timestamp:${timestamp}Z\r\n`
 		+ `Path:ssml\r\n\r\n`
 		+ ssml
 }
@@ -27,16 +34,18 @@ const makeSSML = (params: {
 	input: string,
 	voice: string,
 	pitch: string,
-	rate: number,
-	volume: number,
+	rate: string,
+	volume: string,
 }) => {
-	return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">`
-		+ `<voice name="${params.voice}"><prosody pitch="${params.pitch}" rate="${params.rate}" volume="${params.volume}">`
-		+ `${params.input}</prosody></voice></speak>`.trim()
+	return `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>`
+		+ `<voice name='${params.voice}'>`
+		+ `<prosody pitch='${params.pitch}' rate='${params.rate}' volume='${params.volume}'>`
+		+ `${params.input}`
+		+ `</prosody></voice></speak>`
 }
 
 const readAudioBlob = (ws: WebSocket): Promise<Blob> => {
-	const audioBuffers: ArrayBuffer[] = []
+	const audioBuffers: Uint8Array[] = []
 	const decoder = new TextDecoder()
 	const dbytes = new TextEncoder().encode(BINARY_DELIM)
 	return new Promise((resolve, reject) => {
@@ -74,12 +83,19 @@ const readAudioBlob = (ws: WebSocket): Promise<Blob> => {
 // https://community.cloudflare.com/t/writing-a-websocket-client-to-connect-to-remote-websocket-server-doesnt-work/494853
 // therefore we use a workaround to solve that
 // https://developers.cloudflare.com/workers/examples/websockets/#write-a-websocket-client
-// TODO: implementation of the async WebSocket
 const createWebSocket = async (url: string) => {
 	const r = new Request(url, {
 		headers: {
-			Upgrade: "websocket",
-			Connection: "Upgrade"
+			"Upgrade": "websocket",
+			"Connection": "Upgrade",
+			"Sec-WebSocket-Protocol": "synthesize",
+			"Sec-WebSocket-Version": "13",
+			"Pragma": "no-cache",
+			"Cache-Control": "no-cache",
+			"Origin": "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold",
+			"User-Agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROMIUM_MAJOR_VERSION}.0.0.0 Safari/537.36 Edg/${CHROMIUM_MAJOR_VERSION}.0.0.0`,
+			"Accept-Encoding": "gzip, deflate, br",
+			"Accept-Language": "en-US,en;q=0.9",
 		}
 	})
 	const resp = await fetch(r)
@@ -87,7 +103,7 @@ const createWebSocket = async (url: string) => {
 	if (!ws) {
 		throw new Error("server didn't accept WebSocket")
 	}
-	if (ws.readyState != WebSocket.READY_STATE_OPEN) {
+	if (ws.readyState != WebSocket.OPEN) {
 		throw new Error("incorrect ready state: " + ws.readyState)
 	}
 	return ws
@@ -95,13 +111,17 @@ const createWebSocket = async (url: string) => {
 
 export const createEdgeTTSAPI = () => {
 	return {
-		// reference: https://github.com/rany2/edge-tts/blob/255169484e887f1fe8b8ad3b1fa0e3afa2c8aac2/src/edge_tts/communicate.py#L226
+		// reference: https://github.com/rany2/edge-tts
 		textToSpeech: async ({
 			text: input, voice = "en-US-AriaNeural",
-			pitch = "+0Hz", rate = 1.0, volume = 100.0,
+			pitch = "+0Hz", rate = "+0%", volume = "+0%",
 			outputFormat = OUTPUT_FORMAT
 		}) => {
-			const ws = await createWebSocket(SYNTH_URL)
+			const connectionId = generateConnectionId()
+			const secMsGec = await generateSecMsGec(TRUSTED_CLIENT_TOKEN)
+			const wsUrl = `https://${BASE_URL}/websocket/v1?Ocp-Apim-Subscription-Key=${TRUSTED_CLIENT_TOKEN}&ConnectionId=${connectionId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}`
+			
+			const ws = await createWebSocket(wsUrl)
 			try {
 				ws.accept()
 				const configRequest = makeConfigRequest(outputFormat)

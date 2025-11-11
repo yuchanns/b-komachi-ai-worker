@@ -3,8 +3,8 @@ export interface EdgeTTSAPI {
 		text: string,
 		voice?: string,
 		pitch?: string,
-		rate?: number,
-		volume?: number
+		rate?: string,
+		volume?: string
 		outputFormat?: string
 	}): Promise<Blob>
 }

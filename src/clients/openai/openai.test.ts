@@ -1,16 +1,21 @@
+import { describe, test, expect, beforeAll } from "vitest"
+import { env } from "cloudflare:test"
 import toml from "markty-toml"
 import { differenciate, promptToAnalyze, promptToTranslate } from "../../layers"
 import { Injector } from "../../types"
 import { createOpenAIAPI } from "./openai"
 
-const env = getMiniflareBindings()
-
 describe("openai", () => {
-	const ai = createOpenAIAPI({
-		url: env.ENV_OPENAI_URL,
-		apiKey: env.ENV_OPENAI_API_KEY,
-		model: env.ENV_OPENAI_MODEL
+	let ai: ReturnType<typeof createOpenAIAPI>
+	
+	beforeAll(() => {
+		ai = createOpenAIAPI({
+			url: env.ENV_OPENAI_URL,
+			apiKey: env.ENV_OPENAI_API_KEY,
+			model: env.ENV_OPENAI_MODEL
+		})
 	})
+	
 	test("stream", async () => {
 		const messages = promptToAnalyze("prevelent")
 		let text = ""

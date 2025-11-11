@@ -5,23 +5,22 @@
 	"scripts": {
 		"dev": "wrangler dev src/index.ts",
 		"deploy": "wrangler deploy --minify src/index.ts",
-		"test": "jest --verbose"
+		"test": "vitest"
 	},
 	"dependencies": {
-		"@google/generative-ai": "^0.1.2",
+		"@google/generative-ai": "^0.24.1",
 		"@yuchanns/flameai": "^0.0.3",
-		"@yuchanns/flamebot": "^0.0.10",
-		"hono": "^3.11.4",
+		"@yuchanns/flamebot": "^0.0.12",
+		"hono": "^4.10.4",
 		"markty-toml": "^0.1.1"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20230914.0",
-		"@types/jest": "^29.5.11",
-		"esbuild": "^0.19.9",
-		"esbuild-jest": "^0.5.0",
-		"jest": "^29.7.0",
-		"jest-environment-miniflare": "^2.14.1",
-		"miniflare": "^3.20231030.3",
-		"wrangler": "^3.19.0"
+		"@cloudflare/vitest-pool-workers": "^0.10.5",
+		"@cloudflare/workers-types": "^4.20251111.0",
+		"@vitest/runner": "~3.2.4",
+		"@vitest/snapshot": "~3.2.4",
+		"esbuild": "^0.27.0",
+		"vitest": "~3.2.4",
+		"wrangler": "^4.46.0"
 	}
 }

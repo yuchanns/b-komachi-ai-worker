@@ -1,3 +1,5 @@
+import { describe, test, expect, beforeAll } from "vitest"
+import { env } from "cloudflare:test"
 import { Injector } from "../types"
 import { _analyze, differenciate } from "./update"
 import { createEdgeTTSAPI } from "../clients"
@@ -5,14 +7,18 @@ import { promptToTranslate } from "./prompts"
 import { createTelegramBotAPI } from "@yuchanns/flamebot"
 import { createAzureAPI } from "@yuchanns/flameai"
 
-const env = getMiniflareBindings()
-
 describe("ai", () => {
-	const inj = {
-		ai: createAzureAPI({
-			url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
-		})
-	} as Injector
+	let inj: Injector
+	
+	beforeAll(() => {
+		inj = {
+			ai: createAzureAPI({
+				url: env.ENV_AZURE_URL, 
+				apiVersion: env.ENV_AZURE_API_VERSION, 
+				apiKey: env.ENV_AZURE_API_KEY
+			})
+		} as Injector
+	})
 
 	test("word", async () => {
 		const typ = await differenciate(inj, "sophisticated")
@@ -39,7 +45,12 @@ describe("ai", () => {
 })
 
 describe("bot", () => {
-	const bot = createTelegramBotAPI(env.ENV_BOT_TOKEN)
+	let bot: ReturnType<typeof createTelegramBotAPI>
+	
+	beforeAll(() => {
+		bot = createTelegramBotAPI(env.ENV_BOT_TOKEN)
+	})
+	
 	test("getMe", async () => {
 		const resp = await bot.getMe()
 		console.log(resp)
@@ -65,13 +76,20 @@ print("hello world")
 })
 
 describe("toml", () => {
-	const inj = {
-		ai: createAzureAPI({
-			url: env.ENV_AZURE_URL, apiVersion: env.ENV_AZURE_API_VERSION, apiKey: env.ENV_AZURE_API_KEY
-		}),
-		bot: createTelegramBotAPI(env.ENV_BOT_TOKEN),
-		tts: createEdgeTTSAPI()
-	} as Injector
+	let inj: Injector
+	
+	beforeAll(() => {
+		inj = {
+			ai: createAzureAPI({
+				url: env.ENV_AZURE_URL, 
+				apiVersion: env.ENV_AZURE_API_VERSION, 
+				apiKey: env.ENV_AZURE_API_KEY
+			}),
+			bot: createTelegramBotAPI(env.ENV_BOT_TOKEN),
+			tts: createEdgeTTSAPI()
+		} as Injector
+	})
+	
 	test("parse", async () => {
 		const {
 			result: { message_id },
