@@ -15,7 +15,7 @@ jobs:
               with:
                   version: latest
                   run_install: false
-            - uses: cloudflare/wrangler-action@v3
+            - uses: cloudflare/wrangler-action@v4
               name: Dry Deploy
               with:
                   packageManager: pnpm

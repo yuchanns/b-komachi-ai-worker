@@ -15,7 +15,7 @@ jobs:
               with:
                   version: latest
                   run_install: false
-            - uses: cloudflare/wrangler-action@v3
+            - uses: cloudflare/wrangler-action@v4
               with:
                   packageManager: pnpm
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
