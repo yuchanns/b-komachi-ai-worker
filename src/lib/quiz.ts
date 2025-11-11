@@ -8,12 +8,16 @@ import { eq, desc, lt, sql } from "drizzle-orm"
 export const storeVocabulary = async (db: D1Database, userId: number, word: string) => {
     const drizzle = createDrizzleClient(db)
 
-    // Insert or ignore if word already exists (case-insensitive)
+    // Insert with default weight or ignore if word already exists (case-insensitive)
     try {
         await drizzle.insert(vocabulary).values({
             userId,
             word: word.trim(),
             timestamp: Date.now(),
+            weight: 1.0,
+            correctCount: 0,
+            incorrectCount: 0,
+            lastReviewed: null,
         })
     } catch (error) {
         // Ignore duplicate key errors due to UNIQUE constraint
@@ -21,22 +25,25 @@ export const storeVocabulary = async (db: D1Database, userId: number, word: stri
             throw error
         }
     }
-
-    // Keep only last 100 words per user
-    const userWords = await drizzle
-        .select({ id: vocabulary.id })
-        .from(vocabulary)
-        .where(eq(vocabulary.userId, userId))
-        .orderBy(desc(vocabulary.timestamp))
-        .limit(100)
-
-    if (userWords.length === 100) {
-        const keepIds = userWords.map((w) => w.id)
-        await drizzle.delete(vocabulary).where(sql`${vocabulary.userId} = ${userId} AND ${vocabulary.id} NOT IN ${keepIds}`)
-    }
+    // No longer limit to 100 words - keep all vocabulary
 }
 
-// Get user's vocabulary using Drizzle ORM
+// Get user's vocabulary for quiz - prioritize high weight words
+export const getUserVocabularyForQuiz = async (db: D1Database, userId: number, limit: number = 5): Promise<string[]> => {
+    const drizzle = createDrizzleClient(db)
+
+    // Get words ordered by weight (descending) to prioritize words with more mistakes
+    const result = await drizzle
+        .select({ word: vocabulary.word })
+        .from(vocabulary)
+        .where(eq(vocabulary.userId, userId))
+        .orderBy(desc(vocabulary.weight), desc(vocabulary.timestamp))
+        .limit(limit)
+
+    return result.map((row) => row.word)
+}
+
+// Get user's vocabulary count
 export const getUserVocabulary = async (db: D1Database, userId: number): Promise<string[]> => {
     const drizzle = createDrizzleClient(db)
 
@@ -49,12 +56,52 @@ export const getUserVocabulary = async (db: D1Database, userId: number): Promise
     return result.map((row) => row.word)
 }
 
-// Quiz question type
+// Update word weight based on quiz answer
+export const updateWordWeight = async (db: D1Database, userId: number, word: string, isCorrect: boolean) => {
+    const drizzle = createDrizzleClient(db)
+
+    // Get current word data
+    const wordData = await drizzle
+        .select()
+        .from(vocabulary)
+        .where(sql`${vocabulary.userId} = ${userId} AND LOWER(${vocabulary.word}) = LOWER(${word})`)
+        .limit(1)
+
+    if (wordData.length === 0) return
+
+    const current = wordData[0]
+
+    // Calculate new weight
+    // Correct answer: decrease weight (minimum 0.1)
+    // Incorrect answer: increase weight (add 0.5 each time)
+    let newWeight = current.weight
+    if (isCorrect) {
+        newWeight = Math.max(0.1, newWeight - 0.3)
+    } else {
+        newWeight = newWeight + 0.5
+    }
+
+    // Update statistics
+    await drizzle
+        .update(vocabulary)
+        .set({
+            weight: newWeight,
+            correctCount: isCorrect ? current.correctCount + 1 : current.correctCount,
+            incorrectCount: isCorrect ? current.incorrectCount : current.incorrectCount + 1,
+            lastReviewed: Date.now(),
+        })
+        .where(sql`${vocabulary.userId} = ${userId} AND LOWER(${vocabulary.word}) = LOWER(${word})`)
+}
+
+// Quiz question type with multiple question types
 export interface QuizQuestion {
+    type: "meaning" | "fill_blank" | "synonym" | "translation" | "word_form"
     word: string
-    correct_meaning: string
+    question: string // The actual question text
+    correct_answer: string
     options: string[]
     correct_index: number
+    explanation?: string // Optional explanation for the answer
 }
 
 // Generate quiz questions from user vocabulary
@@ -63,21 +110,43 @@ const promptToGenerateQuiz = (words: string[]) => {
     return [
         {
             role: "system",
-            content: `你是一个词汇测验生成器。请生成 JSON 格式的测验问题。
-每个问题应该包含：
-- word: 词汇单词（保持英文原词）
-- correct_meaning: 正确的中文释义
-- options: 包含4个可能的中文释义的数组（包括正确答案）
-- correct_index: 正确答案在 options 数组中的索引（0-3）
+            content: `你是一个专业的英语词汇测验生成器。请生成多样化的测验问题，包含以下几种题型：
 
-只返回一个有效的 JSON 数组，不要有其他文本或 markdown 格式。`,
+1. **词义选择** (meaning): 询问单词的中文含义
+2. **填空题** (fill_blank): 给出句子和语境，选择正确的单词
+3. **同义词/反义词** (synonym): 选择同义词或反义词
+4. **句子翻译** (translation): 包含该单词的英文句子翻译成中文
+5. **词形变化** (word_form): 根据语境选择正确的词形（时态、单复数等）
+
+每个问题的 JSON 格式：
+{
+    "type": "题型类型",
+    "word": "测试的单词（英文）",
+    "question": "问题文本（中文）",
+    "correct_answer": "正确答案",
+    "options": ["选项1", "选项2", "选项3", "选项4"],
+    "correct_index": 0-3,
+    "explanation": "答案解释（可选）"
+}
+
+要求：
+- 题型要多样化，不要全是同一种类型
+- 选项要有迷惑性但明确可辨
+- 问题要清晰、符合实际使用场景
+- 只返回 JSON 数组，不要其他文本`,
         },
         {
             role: "user",
-            content: `为这些英文单词生成 5 道选择题：${wordList}。
-每道题应该测试单词的中文含义，提供 4 个中文选项。
-确保错误选项听起来合理但与正确答案明显不同。
-只返回 JSON 数组，不要 markdown，不要解释。`,
+            content: `为这些英文单词生成 5 道测验题：${wordList}
+
+请生成多样化的题型组合，例如：
+- 2道词义选择题
+- 1道填空题  
+- 1道同义词题
+- 1道句子翻译题
+
+确保题目难度适中，适合英语学习者。
+只返回 JSON 数组，不要 markdown 格式。`,
         },
     ]
 }
@@ -109,7 +178,15 @@ export const generateQuiz = async (inj: Injector, words: string[]): Promise<Quiz
         // Validate and take up to 5 questions
         return questions
             .filter(
-                (q) => q.word && q.correct_meaning && q.options && q.options.length === 4 && q.correct_index >= 0 && q.correct_index < 4
+                (q) =>
+                    q.type &&
+                    q.word &&
+                    q.question &&
+                    q.correct_answer &&
+                    q.options &&
+                    q.options.length === 4 &&
+                    q.correct_index >= 0 &&
+                    q.correct_index < 4
             )
             .slice(0, 5)
     } catch (error) {
@@ -138,8 +215,19 @@ export const sendQuizQuestion = async (
         ]),
     }
 
+    // Get question type emoji
+    const typeEmoji = {
+        meaning: "📖",
+        fill_blank: "✍️",
+        synonym: "🔄",
+        translation: "🌐",
+        word_form: "📝",
+    }
+
     const questionText =
-        `📝 *测验题目 ${questionIndex + 1}/${totalQuestions}*\n\n` + `"*${question.word}*" 的中文意思是什么？\n\n` + `请选择正确答案：`
+        `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${totalQuestions}*\n\n` +
+        `${question.question}\n\n` +
+        `请选择正确答案：`
 
     await bot.sendMessage({
         chat_id,
@@ -236,6 +324,9 @@ export const handleQuizAnswer = async (
     const isCorrect = selectedIndex === question.correct_index
     quiz.answers[questionIndex] = isCorrect ? 1 : 0
 
+    // Update word weight based on answer
+    await updateWordWeight(db, userId, question.word, isCorrect)
+
     // Update stored quiz using Drizzle ORM
     await drizzle
         .update(quizState)
@@ -245,7 +336,16 @@ export const handleQuizAnswer = async (
         .where(eq(quizState.userId, userId))
 
     // Update message with result
-    let resultText = `📝 *测验题目 ${questionIndex + 1}/${quiz.questions.length}*\n\n` + `"*${question.word}*" 的中文意思是什么？\n\n`
+    const typeEmoji = {
+        meaning: "📖",
+        fill_blank: "✍️",
+        synonym: "🔄",
+        translation: "🌐",
+        word_form: "📝",
+    }
+
+    let resultText =
+        `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${quiz.questions.length}*\n\n` + `${question.question}\n\n`
 
     question.options.forEach((option, index) => {
         const prefix = String.fromCharCode(65 + index)
@@ -263,6 +363,11 @@ export const handleQuizAnswer = async (
     })
 
     resultText += `\n${isCorrect ? "🎉 回答正确！" : `❌ 回答错误！正确答案是：${question.options[question.correct_index]}`}`
+
+    // Add explanation if available
+    if (question.explanation) {
+        resultText += `\n\n💡 ${question.explanation}`
+    }
 
     await bot.editMessageText({
         chat_id,

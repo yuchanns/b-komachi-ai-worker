@@ -4,11 +4,16 @@ CREATE TABLE IF NOT EXISTS vocabulary (
     user_id INTEGER NOT NULL,
     word TEXT NOT NULL,
     timestamp INTEGER NOT NULL,
+    weight REAL NOT NULL DEFAULT 1.0,
+    correct_count INTEGER NOT NULL DEFAULT 0,
+    incorrect_count INTEGER NOT NULL DEFAULT 0,
+    last_reviewed INTEGER,
     UNIQUE(user_id, word COLLATE NOCASE)
 );
 
 CREATE INDEX IF NOT EXISTS idx_vocabulary_user_id ON vocabulary(user_id);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_timestamp ON vocabulary(timestamp);
+CREATE INDEX IF NOT EXISTS idx_vocabulary_weight ON vocabulary(user_id, weight);
 
 -- Quiz state table to store active quiz sessions
 CREATE TABLE IF NOT EXISTS quiz_state (

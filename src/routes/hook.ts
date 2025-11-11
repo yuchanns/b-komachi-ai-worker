@@ -58,10 +58,12 @@ hook.post(WEBHOOK, async (c) => {
             // Handle /quiz command
             const { from, chat } = update.message
             if (from) {
-                const { getUserVocabulary, generateQuiz, sendQuizQuestion, storeQuizState } = await import("../lib/quiz")
-                const words = await getUserVocabulary(db, from.id)
+                const { getUserVocabulary, getUserVocabularyForQuiz, generateQuiz, sendQuizQuestion, storeQuizState } = await import(
+                    "../lib/quiz"
+                )
+                const allWords = await getUserVocabulary(db, from.id)
 
-                if (words.length === 0) {
+                if (allWords.length === 0) {
                     await bot.sendMessage({
                         chat_id: chat.id,
                         text: "你还没有词汇记录。先向我询问一些单词吧！",
@@ -69,12 +71,23 @@ hook.post(WEBHOOK, async (c) => {
                     return new Response("Ok")
                 }
 
+                if (allWords.length < 5) {
+                    await bot.sendMessage({
+                        chat_id: chat.id,
+                        text: `你当前有 ${allWords.length} 个词汇，至少需要 5 个单词才能开始测验。继续学习更多单词吧！`,
+                    })
+                    return new Response("Ok")
+                }
+
+                // Get high-priority words (high weight = more mistakes)
+                const priorityWords = await getUserVocabularyForQuiz(db, from.id, 10)
+
                 await bot.sendMessage({
                     chat_id: chat.id,
-                    text: `📚 正在从你的 ${words.length} 个词汇中生成测验...`,
+                    text: `📚 正在从你的 ${allWords.length} 个词汇中生成测验...\n💡 本次测验将优先复习需要加强的单词`,
                 })
 
-                const questions = await generateQuiz({ bot, ai, tts }, words)
+                const questions = await generateQuiz({ bot, ai, tts }, priorityWords)
 
                 if (questions.length === 0) {
                     await bot.sendMessage({
