@@ -11,9 +11,12 @@ importers:
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1
-      '@yuchanns/flameai':
-        specifier: ^0.0.3
-        version: 0.0.3
+      '@xsai/generate-text':
+        specifier: ^0.4.0-beta.8
+        version: 0.4.0-beta.8
+      '@xsai/stream-text':
+        specifier: ^0.4.0-beta.8
+        version: 0.4.0-beta.8
       '@yuchanns/flamebot':
         specifier: ^0.0.12
         version: 0.0.12
@@ -1006,8 +1009,17 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@yuchanns/flameai@0.0.3':
-    resolution: {integrity: sha512-PtaMlI28TeSzpNbsP/AwjIsBYDU5e142g5l2hKVPPpnPiCPEPet763gUrnNqUjrg6MpHN1o0P3wwHZTlraVfVw==}
+  '@xsai/generate-text@0.4.0-beta.8':
+    resolution: {integrity: sha512-y4LPKVePLWTy2vZvaD6rdjuTtdyC0OATo12l8tFbeBAUZxSoFgcWpiQrx+s+pWEnjMtU/CbgYIrAme8S8RMEEQ==}
+
+  '@xsai/shared-chat@0.4.0-beta.8':
+    resolution: {integrity: sha512-M24U0vt/zIcAfLLsED+nlf8n7DXxR+KfiSBWfAmwV8lYjtOAWV0hGBCmEanxNioIZLo1j2mxud8RR1BNpunTCw==}
+
+  '@xsai/shared@0.4.0-beta.8':
+    resolution: {integrity: sha512-z/2s+PPYTYHAZxiFSGFmAIYxZHUUqQlBIxlzTW1LzOz8YF2XNLBSy8GuOI9qQMV+Wh2D851drSIO/vnObEN+OA==}
+
+  '@xsai/stream-text@0.4.0-beta.8':
+    resolution: {integrity: sha512-pClSqMPxbCm+nqYvmErUeJKT9bZmFfJc7jy+hAB64D2AXBfCPp1Bde9jlSIs7U4eBK15dk2slOdyhvXaihVSIw==}
 
   '@yuchanns/flamebot@0.0.12':
     resolution: {integrity: sha512-rCcj4Azagbt696B8zVpwRe6Mxdht0ft4id6zYFaLV7qni+Z5DZPZjAdWMcvGG8G5IwGsHeEYVd40JwDTvjlkug==}
@@ -2423,7 +2435,21 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@yuchanns/flameai@0.0.3': {}
+  '@xsai/generate-text@0.4.0-beta.8':
+    dependencies:
+      '@xsai/shared': 0.4.0-beta.8
+      '@xsai/shared-chat': 0.4.0-beta.8
+
+  '@xsai/shared-chat@0.4.0-beta.8':
+    dependencies:
+      '@xsai/shared': 0.4.0-beta.8
+
+  '@xsai/shared@0.4.0-beta.8': {}
+
+  '@xsai/stream-text@0.4.0-beta.8':
+    dependencies:
+      '@xsai/shared': 0.4.0-beta.8
+      '@xsai/shared-chat': 0.4.0-beta.8
 
   '@yuchanns/flamebot@0.0.12': {}
 

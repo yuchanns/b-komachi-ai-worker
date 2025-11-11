@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import { ChatResponse, ChunkResponse, OpenAIAPI } from "@yuchanns/flameai"
+import type { AIAPI, ChatParams, ChatResponse, ChunkResponse } from "../../bindings"
 
-export const createGeminiAPI = (params: { apiKey: string }) => {
+export const createGeminiAPI = (params: { apiKey: string }): AIAPI => {
     const ai = new GoogleGenerativeAI(params.apiKey)
     const model = ai.getGenerativeModel({ model: "gemini-pro" })
     return {
-        chat: async (payloads, onStream) => {
+        chat: async (payloads: ChatParams, onStream?) => {
             const contents = []
             for (let message of payloads.messages) {
                 let role = "user"
@@ -33,7 +33,7 @@ export const createGeminiAPI = (params: { apiKey: string }) => {
                                 role: "assistant",
                                 content: result.response.text(),
                             },
-                            finish_reason: result.response.candidates?.[0]?.finishReason,
+                            finish_reason: result.response.candidates?.[0]?.finishReason || "stop",
                         },
                     ],
                 } as ChatResponse
@@ -49,7 +49,7 @@ export const createGeminiAPI = (params: { apiKey: string }) => {
                                     role: "assistant",
                                     content: chunk.text(),
                                 },
-                                finish_reason: chunk.candidates?.[0]?.finishReason,
+                                finish_reason: chunk.candidates?.[0]?.finishReason || "",
                             },
                         ],
                     } as ChunkResponse,
@@ -58,5 +58,5 @@ export const createGeminiAPI = (params: { apiKey: string }) => {
             }
             await onStream(undefined, true)
         },
-    } as OpenAIAPI
+    }
 }

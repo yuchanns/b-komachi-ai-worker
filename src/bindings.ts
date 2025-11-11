@@ -1,5 +1,4 @@
 import { TelegramBotAPI } from "@yuchanns/flamebot/dist/types"
-import { OpenAIAPI } from "@yuchanns/flameai"
 
 export type Bindings = {
     ENV_BOT_TOKEN: string
@@ -21,9 +20,46 @@ export type EdgeTTSAPI = {
     textToSpeech: (params: { text: string }) => Promise<Blob>
 }
 
+// AI API interface compatible with both streaming and non-streaming calls
+export type Message = {
+    role: string
+    content: string
+}
+
+export type ChatParams = {
+    messages: Message[]
+    temperature: number
+}
+
+export type ChatResponse = {
+    choices: Array<{
+        index: number
+        message: {
+            role: string
+            content: string
+        }
+        finish_reason: string
+    }>
+}
+
+export type ChunkResponse = {
+    choices: Array<{
+        index: number
+        delta: {
+            role: string
+            content: string
+        }
+        finish_reason: string
+    }>
+}
+
+export type AIAPI = {
+    chat(params: ChatParams, onStream?: (r: ChunkResponse | undefined, done: boolean) => Promise<void>): Promise<ChatResponse | undefined>
+}
+
 export type Injector = {
     bot: TelegramBotAPI
-    ai: OpenAIAPI
+    ai: AIAPI
     tts: EdgeTTSAPI
 }
 

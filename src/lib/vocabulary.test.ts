@@ -5,7 +5,7 @@ import { _analyze, differenciate } from "./vocabulary"
 import { createEdgeTTSAPI } from "../services"
 import { promptToTranslate } from "./prompts"
 import { createTelegramBotAPI } from "@yuchanns/flamebot"
-import { createAzureAPI } from "@yuchanns/flameai"
+import { createAzureAPI } from "../services/openai/azure"
 
 describe("ai", () => {
     let inj: Injector
