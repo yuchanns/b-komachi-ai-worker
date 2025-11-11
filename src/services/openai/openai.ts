@@ -1,4 +1,5 @@
-import { generateText, streamText } from "xsai"
+import { generateText } from "@xsai/generate-text"
+import { streamText } from "@xsai/stream-text"
 import type { AIAPI, ChatParams, Message } from "../../bindings"
 
 const makeBaseURL = (url: string) => {

@@ -11,10 +11,11 @@
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
+        "@xsai/generate-text": "^0.4.0-beta.8",
+        "@xsai/stream-text": "^0.4.0-beta.8",
         "@yuchanns/flamebot": "^0.0.12",
         "hono": "^4.10.5",
-        "markty-toml": "^0.1.1",
-        "xsai": "^0.4.0-beta.8"
+        "markty-toml": "^0.1.1"
     },
     "devDependencies": {
         "@cloudflare/vitest-pool-workers": "^0.10.5",
