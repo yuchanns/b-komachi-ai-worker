@@ -2,38 +2,45 @@ import { Injector } from "../bindings"
 import { InlineKeyboardMarkup } from "../services/telegram"
 
 // Store vocabulary for a user
-export const storeVocabulary = async (vocabulary: KVNamespace, userId: number, word: string) => {
-    const key = `vocab:${userId}`
-    const existingData = await vocabulary.get(key)
-    let words: Array<{ word: string; timestamp: number }> = []
+export const storeVocabulary = async (db: D1Database, userId: number, word: string) => {
+    // Insert or ignore if word already exists (case-insensitive)
+    await db
+        .prepare(
+            `INSERT INTO vocabulary (user_id, word, timestamp) 
+             VALUES (?, ?, ?) 
+             ON CONFLICT(user_id, word) DO NOTHING`
+        )
+        .bind(userId, word.trim(), Date.now())
+        .run()
 
-    if (existingData) {
-        words = JSON.parse(existingData)
-    }
-
-    // Check if word already exists
-    const wordExists = words.find((w) => w.word.toLowerCase() === word.toLowerCase())
-    if (!wordExists) {
-        words.push({ word, timestamp: Date.now() })
-        // Keep only last 100 words
-        if (words.length > 100) {
-            words = words.slice(-100)
-        }
-        await vocabulary.put(key, JSON.stringify(words))
-    }
+    // Keep only last 100 words per user
+    await db
+        .prepare(
+            `DELETE FROM vocabulary 
+             WHERE user_id = ? 
+             AND id NOT IN (
+                 SELECT id FROM vocabulary 
+                 WHERE user_id = ? 
+                 ORDER BY timestamp DESC 
+                 LIMIT 100
+             )`
+        )
+        .bind(userId, userId)
+        .run()
 }
 
 // Get user's vocabulary
-export const getUserVocabulary = async (vocabulary: KVNamespace, userId: number): Promise<string[]> => {
-    const key = `vocab:${userId}`
-    const existingData = await vocabulary.get(key)
+export const getUserVocabulary = async (db: D1Database, userId: number): Promise<string[]> => {
+    const result = await db
+        .prepare(
+            `SELECT word FROM vocabulary 
+             WHERE user_id = ? 
+             ORDER BY timestamp DESC`
+        )
+        .bind(userId)
+        .all<{ word: string }>()
 
-    if (!existingData) {
-        return []
-    }
-
-    const words: Array<{ word: string; timestamp: number }> = JSON.parse(existingData)
-    return words.map((w) => w.word)
+    return result.results?.map((row) => row.word) || []
 }
 
 // Quiz question type
@@ -138,6 +145,25 @@ export const sendQuizQuestion = async (
     })
 }
 
+// Store quiz state in database
+export const storeQuizState = async (db: D1Database, userId: number, questions: QuizQuestion[]) => {
+    const now = Date.now()
+    const expiresAt = now + 3600000 // 1 hour
+
+    await db
+        .prepare(
+            `INSERT INTO quiz_state (user_id, questions, answers, created_at, expires_at)
+             VALUES (?, ?, ?, ?, ?)
+             ON CONFLICT(user_id) DO UPDATE SET
+                 questions = excluded.questions,
+                 answers = excluded.answers,
+                 created_at = excluded.created_at,
+                 expires_at = excluded.expires_at`
+        )
+        .bind(userId, JSON.stringify(questions), JSON.stringify(Array(questions.length).fill(-1)), now, expiresAt)
+        .run()
+}
+
 // Handle quiz answer callback
 export const handleQuizAnswer = async (
     inj: Injector,
@@ -146,7 +172,7 @@ export const handleQuizAnswer = async (
     chat_id: number,
     message_id: number,
     userId: number,
-    vocabulary: KVNamespace
+    db: D1Database
 ) => {
     const { bot } = inj
 
@@ -164,10 +190,16 @@ export const handleQuizAnswer = async (
     const selectedIndex = parseInt(parts[2])
 
     // Get stored quiz data
-    const quizKey = `quiz:${userId}`
-    const quizData = await vocabulary.get(quizKey)
+    const result = await db
+        .prepare(
+            `SELECT questions, answers FROM quiz_state 
+             WHERE user_id = ? 
+             AND expires_at > ?`
+        )
+        .bind(userId, Date.now())
+        .first<{ questions: string; answers: string }>()
 
-    if (!quizData) {
+    if (!result) {
         await bot.answerCallbackQuery({
             callback_query_id: callbackQueryId,
             text: "Quiz expired. Please start a new quiz.",
@@ -176,7 +208,10 @@ export const handleQuizAnswer = async (
         return
     }
 
-    const quiz: { questions: QuizQuestion[]; answers: number[] } = JSON.parse(quizData)
+    const quiz: { questions: QuizQuestion[]; answers: number[] } = {
+        questions: JSON.parse(result.questions),
+        answers: JSON.parse(result.answers),
+    }
     const question = quiz.questions[questionIndex]
 
     if (!question) {
@@ -192,7 +227,14 @@ export const handleQuizAnswer = async (
     quiz.answers[questionIndex] = isCorrect ? 1 : 0
 
     // Update stored quiz
-    await vocabulary.put(quizKey, JSON.stringify(quiz), { expirationTtl: 3600 })
+    await db
+        .prepare(
+            `UPDATE quiz_state 
+             SET answers = ? 
+             WHERE user_id = ?`
+        )
+        .bind(JSON.stringify(quiz.answers), userId)
+        .run()
 
     // Update message with result
     let resultText =
@@ -240,7 +282,7 @@ export const handleQuizAnswer = async (
         })
 
         // Clean up quiz data
-        await vocabulary.delete(quizKey)
+        await db.prepare(`DELETE FROM quiz_state WHERE user_id = ?`).bind(userId).run()
     } else {
         // Send next unanswered question
         const nextIndex = quiz.answers.findIndex((a) => a === -1)
@@ -250,4 +292,9 @@ export const handleQuizAnswer = async (
             }, 2000)
         }
     }
+}
+
+// Clean up expired quiz states (can be called periodically)
+export const cleanupExpiredQuizzes = async (db: D1Database) => {
+    await db.prepare(`DELETE FROM quiz_state WHERE expires_at <= ?`).bind(Date.now()).run()
 }

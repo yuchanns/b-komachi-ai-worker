@@ -14,7 +14,7 @@ export type Bindings = {
     ENV_OPENAI_API_KEY: string
     ENV_OPENAI_MODEL: string
     ENV_AI_BACKEND: string
-    VOCABULARY: KVNamespace
+    DB: D1Database
 }
 
 export type EdgeTTSAPI = {

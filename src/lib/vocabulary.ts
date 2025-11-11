@@ -161,7 +161,7 @@ export const _analyze = async (inj: Injector, text: string, chat_id: number, mes
 export const translate = async (
     { chat: { id: chat_id }, message_id: reply_to_message_id, text: rawText, from }: Message,
     inj: Injector,
-    vocabulary?: KVNamespace
+    db?: D1Database
 ) => {
     const {
         result: { message_id },
@@ -176,9 +176,9 @@ export const translate = async (
     if (typ == "word" || typ == "phrase") {
         await _analyze(inj, text, chat_id, message_id, reply_to_message_id)
         // Store vocabulary if available
-        if (vocabulary && from) {
+        if (db && from) {
             const { storeVocabulary } = await import("./quiz")
-            await storeVocabulary(vocabulary, from.id, text.trim())
+            await storeVocabulary(db, from.id, text.trim())
         }
     } else {
         // FIXME: issue of type out of range

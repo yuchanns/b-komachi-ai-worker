@@ -27,7 +27,7 @@ hook.post(WEBHOOK, async (c) => {
     const bot = createBot(c)
     const ai = createAI(c)
     const tts = createTTS(c)
-    const vocabulary = c.env.VOCABULARY
+    const db = c.env.DB
 
     try {
         // Handle callback queries (button clicks)
@@ -35,7 +35,7 @@ hook.post(WEBHOOK, async (c) => {
             const { id, data, message, from } = update.callback_query
             if (data && message && from) {
                 const { handleQuizAnswer } = await import("../lib/quiz")
-                await handleQuizAnswer({ bot, ai, tts }, id, data, message.chat.id, message.message_id, from.id, vocabulary)
+                await handleQuizAnswer({ bot, ai, tts }, id, data, message.chat.id, message.message_id, from.id, db)
             }
             return new Response("Ok")
         }
@@ -46,8 +46,8 @@ hook.post(WEBHOOK, async (c) => {
             // Handle /quiz command
             const { from, chat } = update.message
             if (from) {
-                const { getUserVocabulary, generateQuiz, sendQuizQuestion } = await import("../lib/quiz")
-                const words = await getUserVocabulary(vocabulary, from.id)
+                const { getUserVocabulary, generateQuiz, sendQuizQuestion, storeQuizState } = await import("../lib/quiz")
+                const words = await getUserVocabulary(db, from.id)
 
                 if (words.length === 0) {
                     await bot.sendMessage({
@@ -72,12 +72,8 @@ hook.post(WEBHOOK, async (c) => {
                     return new Response("Ok")
                 }
 
-                // Store quiz in KV with 1 hour expiration
-                const quizData = {
-                    questions,
-                    answers: Array(questions.length).fill(-1),
-                }
-                await vocabulary.put(`quiz:${from.id}`, JSON.stringify(quizData), { expirationTtl: 3600 })
+                // Store quiz in D1 with 1 hour expiration
+                await storeQuizState(db, from.id, questions)
 
                 // Send first question
                 await sendQuizQuestion({ bot, ai, tts }, chat.id, questions[0], 0, questions.length)
@@ -87,7 +83,7 @@ hook.post(WEBHOOK, async (c) => {
             update.message.text?.includes(`@${me.result.username}`)
         ) {
             // Handle mention (vocabulary query)
-            await translate(update.message, { bot, ai, tts }, vocabulary)
+            await translate(update.message, { bot, ai, tts }, db)
         }
     } catch (error) {
         console.error("Error handling update:", error)

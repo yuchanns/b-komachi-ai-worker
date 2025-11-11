@@ -4,10 +4,10 @@ compatibility_date = "2024-11-11"
 compatibility_flags = ["nodejs_compat"]
 env = { }
 
-[[kv_namespaces]]
-binding = "VOCABULARY"
-id = "placeholder"
-preview_id = "placeholder"
+[[d1_databases]]
+binding = "DB"
+database_name = "b-komachi-vocabulary"
+database_id = "placeholder"
 
 [placement]
 mode = "smart"

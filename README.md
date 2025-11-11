@@ -73,23 +73,54 @@ Users must provide the following environment variables within GitHub's Secrets -
 | ENV_OPENAI_MODEL      | Optional                                                                                         | gpt-3.5-turbo                                                     |
 | ENV_AI_BACKEND        | Specify Which AI Backend To Use                                                                  | Optional: `Azure`, `Gemini`, `OpenAI`                             |
 
-### KV Namespace Setup
+### D1 Database Setup
 
-Before deploying, create a KV namespace for vocabulary storage:
+Before deploying, create a D1 database for vocabulary storage:
 
-1. Create KV namespace via Cloudflare dashboard or CLI:
+1. Create D1 database via Cloudflare dashboard or CLI:
 
     ```bash
-    wrangler kv:namespace create "VOCABULARY"
-    wrangler kv:namespace create "VOCABULARY" --preview
+    wrangler d1 create b-komachi-vocabulary
     ```
 
-2. Update `wrangler.toml` with your KV namespace IDs:
+2. Update `wrangler.toml` with your D1 database ID:
+
     ```toml
-    [[kv_namespaces]]
-    binding = "VOCABULARY"
-    id = "your-namespace-id"
-    preview_id = "your-preview-namespace-id"
+    [[d1_databases]]
+    binding = "DB"
+    database_name = "b-komachi-vocabulary"
+    database_id = "your-database-id"
+    ```
+
+3. Initialize the database schema:
+
+    ```bash
+    wrangler d1 execute b-komachi-vocabulary --remote --file=schema.sql
+    ```
+
+    Where `schema.sql` contains:
+
+    ```sql
+    CREATE TABLE IF NOT EXISTS vocabulary (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        word TEXT NOT NULL,
+        timestamp INTEGER NOT NULL,
+        UNIQUE(user_id, word COLLATE NOCASE)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_vocabulary_user_id ON vocabulary(user_id);
+    CREATE INDEX IF NOT EXISTS idx_vocabulary_timestamp ON vocabulary(timestamp);
+
+    CREATE TABLE IF NOT EXISTS quiz_state (
+        user_id INTEGER PRIMARY KEY,
+        questions TEXT NOT NULL,
+        answers TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_quiz_state_expires_at ON quiz_state(expires_at);
     ```
 
 Subsequently, deploy the worker by triggering Github Actions.
