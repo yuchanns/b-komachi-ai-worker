@@ -98,30 +98,7 @@ Before deploying, create a D1 database for vocabulary storage:
     wrangler d1 execute b-komachi-vocabulary --remote --file=schema.sql
     ```
 
-    Where `schema.sql` contains:
-
-    ```sql
-    CREATE TABLE IF NOT EXISTS vocabulary (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        word TEXT NOT NULL,
-        timestamp INTEGER NOT NULL,
-        UNIQUE(user_id, word COLLATE NOCASE)
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_vocabulary_user_id ON vocabulary(user_id);
-    CREATE INDEX IF NOT EXISTS idx_vocabulary_timestamp ON vocabulary(timestamp);
-
-    CREATE TABLE IF NOT EXISTS quiz_state (
-        user_id INTEGER PRIMARY KEY,
-        questions TEXT NOT NULL,
-        answers TEXT NOT NULL,
-        created_at INTEGER NOT NULL,
-        expires_at INTEGER NOT NULL
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_quiz_state_expires_at ON quiz_state(expires_at);
-    ```
+    **Note**: This command is safe to run multiple times. It will create tables if they don't exist, or add missing columns if upgrading from an older version. Some error messages about duplicate columns are expected and can be ignored when migrating.
 
 Subsequently, deploy the worker by triggering Github Actions.
 
