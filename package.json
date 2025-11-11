@@ -1,26 +1,35 @@
 {
-	"name": "b-komachi-ai",
-	"version": "0.1.1",
-	"private": true,
-	"scripts": {
-		"dev": "wrangler dev src/index.ts",
-		"deploy": "wrangler deploy --minify src/index.ts",
-		"test": "vitest"
-	},
-	"dependencies": {
-		"@google/generative-ai": "^0.24.1",
-		"@yuchanns/flameai": "^0.0.3",
-		"@yuchanns/flamebot": "^0.0.12",
-		"hono": "^4.10.4",
-		"markty-toml": "^0.1.1"
-	},
-	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.10.5",
-		"@cloudflare/workers-types": "^4.20251111.0",
-		"@vitest/runner": "~3.2.4",
-		"@vitest/snapshot": "~3.2.4",
-		"esbuild": "^0.27.0",
-		"vitest": "~3.2.4",
-		"wrangler": "^4.46.0"
-	}
+    "name": "b-komachi-ai",
+    "version": "0.1.1",
+    "private": true,
+    "scripts": {
+        "dev": "wrangler dev src/index.ts",
+        "deploy": "wrangler deploy --minify src/index.ts",
+        "test": "vitest",
+        "lint": "eslint . && prettier --check .",
+        "lint:fix": "eslint . --fix && prettier --write ."
+    },
+    "dependencies": {
+        "@google/generative-ai": "^0.24.1",
+        "@yuchanns/flameai": "^0.0.3",
+        "@yuchanns/flamebot": "^0.0.12",
+        "hono": "^4.10.5",
+        "markty-toml": "^0.1.1"
+    },
+    "devDependencies": {
+        "@cloudflare/vitest-pool-workers": "^0.10.5",
+        "@cloudflare/workers-types": "^4.20251111.0",
+        "@eslint/js": "^9.39.1",
+        "@typescript-eslint/eslint-plugin": "^8.46.4",
+        "@typescript-eslint/parser": "^8.46.4",
+        "@vitest/runner": "^3.2.4",
+        "@vitest/snapshot": "^3.2.4",
+        "esbuild": "^0.27.0",
+        "eslint": "^9.39.1",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "prettier": "^3.6.2",
+        "vitest": "^3.2.4",
+        "wrangler": "^4.46.0"
+    }
 }
