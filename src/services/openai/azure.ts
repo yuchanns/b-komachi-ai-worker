@@ -1,14 +1,11 @@
 import { generateText, streamText } from "xsai"
 import { AIAPI, ChatParams, Message } from "../bindings"
 
-const makeBaseURL = (url: string) => {
-    return `${url}/v1`
-}
+export const createAzureAPI = (params: { url: string; apiVersion: string; apiKey: string }): AIAPI => {
+    const baseURL = `${params.url}/chat/completions?api-version=${params.apiVersion}`
 
-export const createOpenAIAPI = (params: { url: string; model: string; apiKey: string }): AIAPI => {
     return {
         chat: async (payloads: ChatParams, onStream) => {
-            const baseURL = makeBaseURL(params.url)
             // Convert our Message type to xsai's Message type
             const messages = payloads.messages.map((m: Message) => ({
                 role: m.role as "system" | "user" | "assistant",
@@ -21,8 +18,10 @@ export const createOpenAIAPI = (params: { url: string; model: string; apiKey: st
                     apiKey: params.apiKey,
                     baseURL: baseURL,
                     messages,
-                    model: params.model,
                     temperature: payloads.temperature,
+                    headers: {
+                        "api-key": params.apiKey,
+                    },
                 })
 
                 return {
@@ -43,8 +42,10 @@ export const createOpenAIAPI = (params: { url: string; model: string; apiKey: st
                     apiKey: params.apiKey,
                     baseURL: baseURL,
                     messages,
-                    model: params.model,
                     temperature: payloads.temperature,
+                    headers: {
+                        "api-key": params.apiKey,
+                    },
                 })
 
                 const reader = result.fullStream.getReader()

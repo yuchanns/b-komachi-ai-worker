@@ -1,6 +1,6 @@
 import { Context } from "hono"
 import { createTelegramBotAPI } from "@yuchanns/flamebot"
-import { createAzureAPI } from "@yuchanns/flameai"
+import { createAzureAPI } from "./openai/azure"
 import { Bindings } from "../bindings"
 import { createEdgeTTSAPI, createGeminiAPI, createOpenAIAPI } from "./"
 
