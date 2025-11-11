@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import { AIAPI, ChatParams, ChatResponse, ChunkResponse } from "../bindings"
+import type { AIAPI, ChatParams, ChatResponse, ChunkResponse } from "../../bindings"
 
 export const createGeminiAPI = (params: { apiKey: string }): AIAPI => {
     const ai = new GoogleGenerativeAI(params.apiKey)
     const model = ai.getGenerativeModel({ model: "gemini-pro" })
     return {
-        chat: async (payloads: ChatParams, onStream) => {
+        chat: async (payloads: ChatParams, onStream?) => {
             const contents = []
             for (let message of payloads.messages) {
                 let role = "user"

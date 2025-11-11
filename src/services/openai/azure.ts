@@ -1,11 +1,13 @@
 import { generateText, streamText } from "xsai"
-import { AIAPI, ChatParams, Message } from "../bindings"
+import type { AIAPI, ChatParams, Message } from "../../bindings"
 
 export const createAzureAPI = (params: { url: string; apiVersion: string; apiKey: string }): AIAPI => {
     const baseURL = `${params.url}/chat/completions?api-version=${params.apiVersion}`
+    // Extract model name from URL (e.g., .../deployments/gpt35 -> gpt35)
+    const model = params.url.split("/deployments/")[1]?.split("/")[0] || "gpt-35-turbo"
 
     return {
-        chat: async (payloads: ChatParams, onStream) => {
+        chat: async (payloads: ChatParams, onStream?) => {
             // Convert our Message type to xsai's Message type
             const messages = payloads.messages.map((m: Message) => ({
                 role: m.role as "system" | "user" | "assistant",
@@ -17,6 +19,7 @@ export const createAzureAPI = (params: { url: string; apiVersion: string; apiKey
                 const result = await generateText({
                     apiKey: params.apiKey,
                     baseURL: baseURL,
+                    model: model,
                     messages,
                     temperature: payloads.temperature,
                     headers: {
@@ -41,6 +44,7 @@ export const createAzureAPI = (params: { url: string; apiVersion: string; apiKey
                 const result = streamText({
                     apiKey: params.apiKey,
                     baseURL: baseURL,
+                    model: model,
                     messages,
                     temperature: payloads.temperature,
                     headers: {

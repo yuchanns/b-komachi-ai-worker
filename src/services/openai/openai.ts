@@ -1,5 +1,5 @@
 import { generateText, streamText } from "xsai"
-import { AIAPI, ChatParams, Message } from "../bindings"
+import type { AIAPI, ChatParams, Message } from "../../bindings"
 
 const makeBaseURL = (url: string) => {
     return `${url}/v1`
@@ -7,7 +7,7 @@ const makeBaseURL = (url: string) => {
 
 export const createOpenAIAPI = (params: { url: string; model: string; apiKey: string }): AIAPI => {
     return {
-        chat: async (payloads: ChatParams, onStream) => {
+        chat: async (payloads: ChatParams, onStream?) => {
             const baseURL = makeBaseURL(params.url)
             // Convert our Message type to xsai's Message type
             const messages = payloads.messages.map((m: Message) => ({
