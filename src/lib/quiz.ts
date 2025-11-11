@@ -95,13 +95,14 @@ export const updateWordWeight = async (db: D1Database, userId: number, word: str
 
 // Quiz question type with multiple question types
 export interface QuizQuestion {
-    type: "meaning" | "fill_blank" | "synonym" | "translation" | "word_form"
+    type: "meaning" | "fill_blank" | "synonym" | "translation_input" | "translation_cn_to_en" | "word_form"
     word: string
     question: string // The actual question text
     correct_answer: string
-    options: string[]
-    correct_index: number
+    options: string[] // Empty for input-based questions
+    correct_index: number // -1 for input-based questions
     explanation?: string // Optional explanation for the answer
+    isInputBased?: boolean // true for questions requiring text input
 }
 
 // Generate quiz questions from user vocabulary
@@ -112,13 +113,16 @@ const promptToGenerateQuiz = (words: string[]) => {
             role: "system",
             content: `你是一个专业的英语词汇测验生成器。请生成多样化的测验问题，包含以下几种题型：
 
-1. **词义选择** (meaning): 询问单词的中文含义
-2. **填空题** (fill_blank): 给出句子和语境，选择正确的单词
-3. **同义词/反义词** (synonym): 选择同义词或反义词
-4. **句子翻译** (translation): 包含该单词的英文句子翻译成中文
-5. **词形变化** (word_form): 根据语境选择正确的词形（时态、单复数等）
+1. **词义选择** (meaning): 询问单词的中文含义，提供4个选项
+2. **填空题** (fill_blank): 给出带有明确空白标记（___）的句子，选择正确的单词。例如："The ___ is very beautiful." 
+3. **同义词/反义词** (synonym): 选择同义词或反义词，提供4个选项
+4. **英译中翻译** (translation_input): 给出包含单词的英文句子，让用户输入中文翻译（不需要options，isInputBased为true）
+5. **中译英翻译** (translation_cn_to_en): 给出中文句子，让用户输入包含指定单词的英文翻译（不需要options，isInputBased为true）
+6. **词形变化** (word_form): 根据语境选择正确的词形（时态、单复数等），提供4个选项
 
 每个问题的 JSON 格式：
+
+选择题格式（meaning, fill_blank, synonym, word_form）：
 {
     "type": "题型类型",
     "word": "测试的单词（英文）",
@@ -126,12 +130,27 @@ const promptToGenerateQuiz = (words: string[]) => {
     "correct_answer": "正确答案",
     "options": ["选项1", "选项2", "选项3", "选项4"],
     "correct_index": 0-3,
-    "explanation": "答案解释（可选）"
+    "explanation": "答案解释（可选）",
+    "isInputBased": false
+}
+
+翻译题格式（translation_input, translation_cn_to_en）：
+{
+    "type": "translation_input" 或 "translation_cn_to_en",
+    "word": "测试的单词（英文）",
+    "question": "问题文本（中文）",
+    "correct_answer": "参考答案",
+    "options": [],
+    "correct_index": -1,
+    "explanation": "答案解释（可选）",
+    "isInputBased": true
 }
 
 要求：
 - 题型要多样化，不要全是同一种类型
-- 选项要有迷惑性但明确可辨
+- **填空题必须在句子中使用下划线（___）标记空白位置，让用户明确知道填空位置**
+- 翻译题使用isInputBased模式，让用户输入答案而非选择
+- 选择题选项要有迷惑性但明确可辨
 - 问题要清晰、符合实际使用场景
 - 只返回 JSON 数组，不要其他文本`,
         },
@@ -140,10 +159,11 @@ const promptToGenerateQuiz = (words: string[]) => {
             content: `为这些英文单词生成 5 道测验题：${wordList}
 
 请生成多样化的题型组合，例如：
-- 2道词义选择题
-- 1道填空题  
+- 1道词义选择题
+- 1道填空题（必须包含 ___ 标记）
 - 1道同义词题
-- 1道句子翻译题
+- 1道英译中翻译题（isInputBased: true）
+- 1道中译英翻译题（isInputBased: true）
 
 确保题目难度适中，适合英语学习者。
 只返回 JSON 数组，不要 markdown 格式。`,
@@ -183,10 +203,10 @@ export const generateQuiz = async (inj: Injector, words: string[]): Promise<Quiz
                     q.word &&
                     q.question &&
                     q.correct_answer &&
-                    q.options &&
-                    q.options.length === 4 &&
-                    q.correct_index >= 0 &&
-                    q.correct_index < 4
+                    // For input-based questions (translation), options can be empty
+                    (q.isInputBased
+                        ? q.options !== undefined && q.correct_index === -1
+                        : q.options && q.options.length === 4 && q.correct_index >= 0 && q.correct_index < 4)
             )
             .slice(0, 5)
     } catch (error) {
@@ -205,36 +225,141 @@ export const sendQuizQuestion = async (
 ) => {
     const { bot } = inj
 
-    // Create inline keyboard with answer options
-    const keyboard: InlineKeyboardMarkup = {
-        inline_keyboard: question.options.map((option, index) => [
-            {
-                text: `${String.fromCharCode(65 + index)}. ${option}`,
-                callback_data: `quiz:${questionIndex}:${index}`,
-            },
-        ]),
-    }
-
     // Get question type emoji
     const typeEmoji = {
         meaning: "📖",
         fill_blank: "✍️",
         synonym: "🔄",
-        translation: "🌐",
+        translation_input: "🌐",
+        translation_cn_to_en: "🌏",
         word_form: "📝",
     }
 
     const questionText =
-        `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${totalQuestions}*\n\n` +
-        `${question.question}\n\n` +
-        `请选择正确答案：`
+        `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${totalQuestions}*\n\n` + `${question.question}\n\n`
 
-    await bot.sendMessage({
-        chat_id,
-        text: questionText,
-        parse_mode: "Markdown",
-        reply_markup: keyboard,
-    })
+    // For input-based questions (translation), use ForceReply to collect text input
+    if (question.isInputBased) {
+        await bot.sendMessage({
+            chat_id,
+            text: questionText + `请直接输入你的答案：`,
+            parse_mode: "Markdown",
+            reply_markup: {
+                force_reply: true,
+                input_field_placeholder: "输入你的翻译...",
+                selective: true,
+            },
+        })
+    } else {
+        // Create inline keyboard with answer options for multiple choice
+        const keyboard: InlineKeyboardMarkup = {
+            inline_keyboard: question.options.map((option, index) => [
+                {
+                    text: `${String.fromCharCode(65 + index)}. ${option}`,
+                    callback_data: `quiz:${questionIndex}:${index}`,
+                },
+            ]),
+        }
+
+        await bot.sendMessage({
+            chat_id,
+            text: questionText + `请选择正确答案：`,
+            parse_mode: "Markdown",
+            reply_markup: keyboard,
+        })
+    }
+}
+
+// Validate translation answer using AI
+const validateTranslation = async (
+    inj: Injector,
+    userAnswer: string,
+    correctAnswer: string,
+    questionType: string,
+    word: string
+): Promise<{ isCorrect: boolean; feedback: string }> => {
+    const prompt =
+        questionType === "translation_cn_to_en"
+            ? [
+                  {
+                      role: "system",
+                      content: `你是一个英语翻译评分专家。请评估用户的英语翻译是否正确。
+
+评分标准：
+1. 必须包含指定的单词："${word}"
+2. 意思准确、完整
+3. 语法正确
+4. 用词恰当
+
+请返回JSON格式：
+{
+    "isCorrect": true/false,
+    "feedback": "评价说明"
+}`,
+                  },
+                  {
+                      role: "user",
+                      content: `参考答案：${correctAnswer}
+用户翻译：${userAnswer}
+指定单词：${word}
+
+请评估用户翻译是否正确。`,
+                  },
+              ]
+            : [
+                  {
+                      role: "system",
+                      content: `你是一个翻译评分专家。请评估用户的中文翻译是否正确。
+
+评分标准：
+1. 意思准确、完整
+2. 表达自然、流畅
+3. 关键信息无遗漏
+
+如果用户翻译与参考答案意思基本一致（允许表达方式不同），应判定为正确。
+
+请返回JSON格式：
+{
+    "isCorrect": true/false,
+    "feedback": "评价说明"
+}`,
+                  },
+                  {
+                      role: "user",
+                      content: `参考答案：${correctAnswer}
+用户翻译：${userAnswer}
+
+请评估用户翻译是否正确。`,
+                  },
+              ]
+
+    try {
+        const response = await inj.ai.chat({
+            messages: prompt,
+            temperature: 0.3,
+        })
+
+        const content = response?.choices[0]?.message.content || '{"isCorrect": false, "feedback": "评估失败"}'
+        const cleanContent = content
+            .replace(/```json\n?/g, "")
+            .replace(/```\n?/g, "")
+            .trim()
+        const result = JSON.parse(cleanContent)
+
+        return {
+            isCorrect: result.isCorrect || false,
+            feedback: result.feedback || "答案已提交",
+        }
+    } catch (error) {
+        console.error("Failed to validate translation:", error)
+        // Fall back to simple comparison if AI validation fails
+        const normalizedUser = userAnswer.trim().toLowerCase()
+        const normalizedCorrect = correctAnswer.trim().toLowerCase()
+        return {
+            isCorrect: normalizedUser === normalizedCorrect,
+            feedback: "AI评估暂时不可用，使用简单匹配进行评分",
+        }
+    }
 }
 
 // Store quiz state in database using Drizzle ORM
@@ -340,7 +465,8 @@ export const handleQuizAnswer = async (
         meaning: "📖",
         fill_blank: "✍️",
         synonym: "🔄",
-        translation: "🌐",
+        translation_input: "🌐",
+        translation_cn_to_en: "🌏",
         word_form: "📝",
     }
 
@@ -397,6 +523,118 @@ export const handleQuizAnswer = async (
         await drizzle.delete(quizState).where(eq(quizState.userId, userId))
     } else {
         // Send next unanswered question immediately (no setTimeout in Workers)
+        const nextIndex = quiz.answers.findIndex((a) => a === -1)
+        if (nextIndex !== -1) {
+            await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)
+        }
+    }
+}
+
+// Handle text input answer for translation questions
+export const handleQuizTextAnswer = async (inj: Injector, userAnswer: string, chat_id: number, userId: number, db: D1Database) => {
+    const { bot } = inj
+    const drizzle = createDrizzleClient(db)
+
+    // Get stored quiz data using Drizzle ORM
+    const result = await drizzle
+        .select()
+        .from(quizState)
+        .where(sql`${quizState.userId} = ${userId} AND ${quizState.expiresAt} > ${Date.now()}`)
+        .limit(1)
+
+    if (!result || result.length === 0) {
+        await bot.sendMessage({
+            chat_id,
+            text: "测验已过期或未开始，请使用 /quiz 开始新的测验。",
+        })
+        return
+    }
+
+    const quizData = result[0]
+    const quiz: { questions: QuizQuestion[]; answers: number[] } = {
+        questions: JSON.parse(quizData.questions),
+        answers: JSON.parse(quizData.answers),
+    }
+
+    // Find the current unanswered question
+    const questionIndex = quiz.answers.findIndex((a) => a === -1)
+    if (questionIndex === -1) {
+        await bot.sendMessage({
+            chat_id,
+            text: "所有题目已完成！",
+        })
+        return
+    }
+
+    const question = quiz.questions[questionIndex]
+
+    // Only handle input-based questions
+    if (!question.isInputBased) {
+        return // Ignore text input for multiple choice questions
+    }
+
+    // Validate answer using AI
+    const validation = await validateTranslation(inj, userAnswer, question.correct_answer, question.type, question.word)
+
+    const isCorrect = validation.isCorrect
+    quiz.answers[questionIndex] = isCorrect ? 1 : 0
+
+    // Update word weight based on answer
+    await updateWordWeight(db, userId, question.word, isCorrect)
+
+    // Update stored quiz using Drizzle ORM
+    await drizzle
+        .update(quizState)
+        .set({
+            answers: JSON.stringify(quiz.answers),
+        })
+        .where(eq(quizState.userId, userId))
+
+    // Send result
+    const typeEmoji = {
+        meaning: "📖",
+        fill_blank: "✍️",
+        synonym: "🔄",
+        translation_input: "🌐",
+        translation_cn_to_en: "🌏",
+        word_form: "📝",
+    }
+
+    let resultText =
+        `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${quiz.questions.length}*\n\n` +
+        `${question.question}\n\n` +
+        `你的答案：${userAnswer}\n` +
+        `参考答案：${question.correct_answer}\n\n` +
+        `${isCorrect ? "✅ 回答正确！" : "❌ 回答有误，请参考参考答案"}\n\n` +
+        `💬 ${validation.feedback}`
+
+    // Add explanation if available
+    if (question.explanation) {
+        resultText += `\n\n💡 ${question.explanation}`
+    }
+
+    await bot.sendMessage({
+        chat_id,
+        text: resultText,
+        parse_mode: "Markdown",
+    })
+
+    // Check if all questions answered
+    const allAnswered = quiz.answers.every((a) => a !== -1)
+    if (allAnswered) {
+        const score = quiz.answers.reduce((sum, a) => sum + a, 0)
+        const total = quiz.questions.length
+
+        await bot.sendMessage({
+            chat_id,
+            text: `🎊 *测验完成！*\n\n你的得分：${score}/${total} (${Math.round((score / total) * 100)}%)`,
+            parse_mode: "Markdown",
+        })
+
+        // Clean up quiz data using Drizzle ORM
+        await drizzle.delete(quizState).where(eq(quizState.userId, userId))
+    } else {
+        // Send next unanswered question immediately
         const nextIndex = quiz.answers.findIndex((a) => a === -1)
         if (nextIndex !== -1) {
             await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)

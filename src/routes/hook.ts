@@ -103,6 +103,10 @@ hook.post(WEBHOOK, async (c) => {
                 // Send first question
                 await sendQuizQuestion({ bot, ai, tts }, chat.id, questions[0], 0, questions.length)
             }
+        } else if (update.message?.reply_to_message && update.message.text && update.message.from) {
+            // Handle text input replies (for translation questions)
+            const { handleQuizTextAnswer } = await import("../lib/quiz")
+            await handleQuizTextAnswer({ bot, ai, tts }, update.message.text, update.message.chat.id, update.message.from.id, db)
         } else if (
             update.message?.entities?.some((val) => val.type == "mention") &&
             update.message.text?.includes(`@${me.result.username}`)
