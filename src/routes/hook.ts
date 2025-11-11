@@ -29,6 +29,18 @@ hook.post(WEBHOOK, async (c) => {
     const tts = createTTS(c)
     const db = c.env.DB
 
+    // Check if DB is properly configured
+    if (!db) {
+        console.error("D1 Database (DB) is not configured. Please set up D1 database binding in wrangler.toml")
+        if (update.message) {
+            await bot.sendMessage({
+                chat_id: update.message.chat.id,
+                text: "⚠️ Database not configured. Please contact the administrator.",
+            })
+        }
+        return new Response("Database not configured", { status: 500 })
+    }
+
     try {
         // Handle callback queries (button clicks)
         if (update.callback_query) {
@@ -52,14 +64,14 @@ hook.post(WEBHOOK, async (c) => {
                 if (words.length === 0) {
                     await bot.sendMessage({
                         chat_id: chat.id,
-                        text: "You don't have any vocabulary words yet. Start by asking me about words!",
+                        text: "你还没有词汇记录。先向我询问一些单词吧！",
                     })
                     return new Response("Ok")
                 }
 
                 await bot.sendMessage({
                     chat_id: chat.id,
-                    text: `📚 Generating quiz from your ${words.length} vocabulary words...`,
+                    text: `📚 正在从你的 ${words.length} 个词汇中生成测验...`,
                 })
 
                 const questions = await generateQuiz({ bot, ai, tts }, words)
@@ -67,7 +79,7 @@ hook.post(WEBHOOK, async (c) => {
                 if (questions.length === 0) {
                     await bot.sendMessage({
                         chat_id: chat.id,
-                        text: "Failed to generate quiz. Please try again later.",
+                        text: "生成测验失败，请稍后再试。",
                     })
                     return new Response("Ok")
                 }
