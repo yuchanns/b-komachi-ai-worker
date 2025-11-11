@@ -89,6 +89,7 @@ const createWebSocket = async (url: string) => {
 			"Upgrade": "websocket",
 			"Connection": "Upgrade",
 			"Sec-WebSocket-Protocol": "synthesize",
+			"Sec-WebSocket-Version": "13",
 			"Pragma": "no-cache",
 			"Cache-Control": "no-cache",
 			"Origin": "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold",
@@ -102,7 +103,7 @@ const createWebSocket = async (url: string) => {
 	if (!ws) {
 		throw new Error("server didn't accept WebSocket")
 	}
-	if (ws.readyState != WebSocket.READY_STATE_OPEN) {
+	if (ws.readyState != WebSocket.OPEN) {
 		throw new Error("incorrect ready state: " + ws.readyState)
 	}
 	return ws
