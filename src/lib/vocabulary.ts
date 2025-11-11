@@ -1,8 +1,7 @@
-import toml from "markty-toml"
-import { Injector } from "../types"
-import { Analyze } from "./types"
-import { promptToAnalyze, promptToDifferenciate, promptToTranslate, types } from "./prompts"
-import { Message } from "@yuchanns/flamebot/dist/types"
+import toml from 'markty-toml';
+import { Injector, Analyze } from '../bindings';
+import { promptToAnalyze, promptToDifferenciate, promptToTranslate, types } from './prompts';
+import { Message } from '@yuchanns/flamebot/dist/types';
 
 export const differenciate = async (inj: Injector, text: string) => {
 	const params = {

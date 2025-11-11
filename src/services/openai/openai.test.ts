@@ -1,16 +1,18 @@
-import { describe, test, expect, beforeAll } from "vitest"
-import { env } from "cloudflare:test"
-import toml from "markty-toml"
-import { differenciate, promptToAnalyze, promptToTranslate } from "../../layers"
-import { createGeminiAPI } from "./gemini"
-import { Injector } from "../../types"
+import { describe, test, expect, beforeAll } from 'vitest';
+import { env } from 'cloudflare:test';
+import toml from 'markty-toml';
+import { differenciate, promptToAnalyze, promptToTranslate } from '../../lib';
+import { Injector } from '../../bindings';
+import { createOpenAIAPI } from './openai';
 
-describe("gemini", () => {
-	let ai: ReturnType<typeof createGeminiAPI>
+describe("openai", () => {
+	let ai: ReturnType<typeof createOpenAIAPI>
 	
 	beforeAll(() => {
-		ai = createGeminiAPI({
-			apiKey: env.ENV_GEMINI_API_KEY
+		ai = createOpenAIAPI({
+			url: env.ENV_OPENAI_URL,
+			apiKey: env.ENV_OPENAI_API_KEY,
+			model: env.ENV_OPENAI_MODEL
 		})
 	})
 	

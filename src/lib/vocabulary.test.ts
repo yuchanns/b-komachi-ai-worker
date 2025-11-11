@@ -1,11 +1,11 @@
-import { describe, test, expect, beforeAll } from "vitest"
-import { env } from "cloudflare:test"
-import { Injector } from "../types"
-import { _analyze, differenciate } from "./update"
-import { createEdgeTTSAPI } from "../clients"
-import { promptToTranslate } from "./prompts"
-import { createTelegramBotAPI } from "@yuchanns/flamebot"
-import { createAzureAPI } from "@yuchanns/flameai"
+import { describe, test, expect, beforeAll } from 'vitest';
+import { env } from 'cloudflare:test';
+import { Injector } from '../bindings';
+import { _analyze, differenciate } from './vocabulary';
+import { createEdgeTTSAPI } from '../services';
+import { promptToTranslate } from './prompts';
+import { createTelegramBotAPI } from '@yuchanns/flamebot';
+import { createAzureAPI } from '@yuchanns/flameai';
 
 describe("ai", () => {
 	let inj: Injector
