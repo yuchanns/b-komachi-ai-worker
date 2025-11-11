@@ -119,7 +119,7 @@ export const createEdgeTTSAPI = () => {
 		}) => {
 			const connectionId = generateConnectionId()
 			const secMsGec = await generateSecMsGec(TRUSTED_CLIENT_TOKEN)
-			const wsUrl = `wss://${BASE_URL}/websocket/v1?Ocp-Apim-Subscription-Key=${TRUSTED_CLIENT_TOKEN}&ConnectionId=${connectionId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}`
+			const wsUrl = `https://${BASE_URL}/websocket/v1?Ocp-Apim-Subscription-Key=${TRUSTED_CLIENT_TOKEN}&ConnectionId=${connectionId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}`
 			
 			const ws = await createWebSocket(wsUrl)
 			try {
