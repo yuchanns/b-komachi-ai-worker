@@ -7,7 +7,7 @@ env = { }
 [[d1_databases]]
 binding = "DB"
 database_name = "b-komachi-vocabulary"
-database_id = "placeholder"
+database_id = "9d356604-c3ea-4278-a110-01915abea80e"
 
 [placement]
 mode = "smart"
