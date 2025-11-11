@@ -1,22 +1,22 @@
 name: Test
 
 on:
-  workflow_dispatch:
-  pull_request:
-    branches:
-      - main
+    workflow_dispatch:
+    pull_request:
+        branches:
+            - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: pnpm/action-setup@v2
-      with:
-          version: latest
-          run_install: false
-    - uses: cloudflare/wrangler-action@v3
-      name: Dry Deploy
-      with:
-        packageManager: pnpm
-        command: deploy --dry-run
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+                  run_install: false
+            - uses: cloudflare/wrangler-action@v3
+              name: Dry Deploy
+              with:
+                  packageManager: pnpm
+                  command: deploy --dry-run

@@ -1,2 +1,2 @@
 export * from "./tts"
-export * from './types'
+export * from "./types"

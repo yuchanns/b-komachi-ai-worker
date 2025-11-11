@@ -1,65 +1,65 @@
-import { TelegramBotAPI } from '@yuchanns/flamebot/dist/types';
-import { OpenAIAPI } from '@yuchanns/flameai';
+import { TelegramBotAPI } from "@yuchanns/flamebot/dist/types"
+import { OpenAIAPI } from "@yuchanns/flameai"
 
 export type Bindings = {
-	ENV_BOT_TOKEN: string;
-	ENV_BOT_SECRET: string;
-	ENV_AZURE_URL: string;
-	ENV_AZURE_API_KEY: string;
-	ENV_AZURE_API_VERSION: string;
-	ENV_AZURE_TTS_ENDPOINT: string;
-	ENV_AZURE_TTS_KEY: string;
-	ENV_CHAT_ID: string;
-	ENV_GEMINI_API_KEY: string;
-	ENV_OPENAI_URL: string;
-	ENV_OPENAI_API_KEY: string;
-	ENV_OPENAI_MODEL: string;
-	ENV_AI_BACKEND: string;
-};
+    ENV_BOT_TOKEN: string
+    ENV_BOT_SECRET: string
+    ENV_AZURE_URL: string
+    ENV_AZURE_API_KEY: string
+    ENV_AZURE_API_VERSION: string
+    ENV_AZURE_TTS_ENDPOINT: string
+    ENV_AZURE_TTS_KEY: string
+    ENV_CHAT_ID: string
+    ENV_GEMINI_API_KEY: string
+    ENV_OPENAI_URL: string
+    ENV_OPENAI_API_KEY: string
+    ENV_OPENAI_MODEL: string
+    ENV_AI_BACKEND: string
+}
 
 export type EdgeTTSAPI = {
-	textToSpeech: (params: { text: string }) => Promise<Blob>;
-};
+    textToSpeech: (params: { text: string }) => Promise<Blob>
+}
 
 export type Injector = {
-	bot: TelegramBotAPI;
-	ai: OpenAIAPI;
-	tts: EdgeTTSAPI;
-};
+    bot: TelegramBotAPI
+    ai: OpenAIAPI
+    tts: EdgeTTSAPI
+}
 
 export type Analyze = {
-	word?: {
-		text: string;
-	};
-	pronunciation?: {
-		ipa: string;
-	};
-	meaning?: {
-		part_of_speech: string;
-		definitions: string[];
-	}[];
-	example?: {
-		sentence: string;
-		translation: string;
-	}[];
-	origin?: {
-		etymology: string;
-	};
-	related?: {
-		prefixes: string[];
-		suffixes: string[];
-		roots: string[];
-	};
-	derivatives?: {
-		word: string;
-		meaning: string[];
-	}[];
-	synonyms?: {
-		word: string;
-		meaning: string[];
-	}[];
-	homophones?: {
-		word: string;
-		meaning: string[];
-	}[];
-};
+    word?: {
+        text: string
+    }
+    pronunciation?: {
+        ipa: string
+    }
+    meaning?: {
+        part_of_speech: string
+        definitions: string[]
+    }[]
+    example?: {
+        sentence: string
+        translation: string
+    }[]
+    origin?: {
+        etymology: string
+    }
+    related?: {
+        prefixes: string[]
+        suffixes: string[]
+        roots: string[]
+    }
+    derivatives?: {
+        word: string
+        meaning: string[]
+    }[]
+    synonyms?: {
+        word: string
+        meaning: string[]
+    }[]
+    homophones?: {
+        word: string
+        meaning: string[]
+    }[]
+}

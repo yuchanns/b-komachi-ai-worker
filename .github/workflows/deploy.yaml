@@ -1,48 +1,48 @@
 name: Deploy
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-    - main
+    workflow_dispatch:
+    push:
+        branches:
+            - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: pnpm/action-setup@v2
-      with:
-          version: latest
-          run_install: false
-    - uses: cloudflare/wrangler-action@v3
-      with:
-        packageManager: pnpm
-        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        secrets: |
-          ENV_BOT_TOKEN
-          ENV_BOT_SECRET
-          ENV_AZURE_URL
-          ENV_AZURE_API_KEY
-          ENV_AZURE_API_VERSION
-          ENV_AZURE_TTS_ENDPOINT
-          ENV_AZURE_TTS_KEY
-          ENV_GEMINI_API_KEY
-          ENV_AI_BACKEND
-          ENV_OPENAI_URL
-          ENV_OPENAI_API_KEY
-          ENV_OPENAI_MODEL
-      env:
-        ENV_BOT_TOKEN: ${{ secrets.ENV_BOT_TOKEN }}
-        ENV_BOT_SECRET: ${{ secrets.ENV_BOT_SECRET }}
-        ENV_AZURE_URL: ${{ secrets.ENV_AZURE_URL }}
-        ENV_AZURE_API_KEY: ${{ secrets.ENV_AZURE_API_KEY }}
-        ENV_AZURE_API_VERSION: ${{ secrets.ENV_AZURE_API_VERSION }}
-        ENV_AZURE_TTS_ENDPOINT: ${{ secrets.ENV_AZURE_TTS_ENDPOINT }}
-        ENV_AZURE_TTS_KEY: ${{ secrets.ENV_AZURE_TTS_KEY }}
-        ENV_GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
-        ENV_AI_BACKEND: ${{ secrets.ENV_AI_BACKEND }}
-        ENV_OPENAI_URL: ${{ secrets.ENV_OPENAI_URL }}
-        ENV_OPENAI_API_KEY: ${{ secrets.ENV_OPENAI_API_KEY }}
-        ENV_OPENAI_MODEL: ${{ secrets.ENV_OPENAI_MODEL }}
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+                  run_install: false
+            - uses: cloudflare/wrangler-action@v3
+              with:
+                  packageManager: pnpm
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  secrets: |
+                      ENV_BOT_TOKEN
+                      ENV_BOT_SECRET
+                      ENV_AZURE_URL
+                      ENV_AZURE_API_KEY
+                      ENV_AZURE_API_VERSION
+                      ENV_AZURE_TTS_ENDPOINT
+                      ENV_AZURE_TTS_KEY
+                      ENV_GEMINI_API_KEY
+                      ENV_AI_BACKEND
+                      ENV_OPENAI_URL
+                      ENV_OPENAI_API_KEY
+                      ENV_OPENAI_MODEL
+              env:
+                  ENV_BOT_TOKEN: ${{ secrets.ENV_BOT_TOKEN }}
+                  ENV_BOT_SECRET: ${{ secrets.ENV_BOT_SECRET }}
+                  ENV_AZURE_URL: ${{ secrets.ENV_AZURE_URL }}
+                  ENV_AZURE_API_KEY: ${{ secrets.ENV_AZURE_API_KEY }}
+                  ENV_AZURE_API_VERSION: ${{ secrets.ENV_AZURE_API_VERSION }}
+                  ENV_AZURE_TTS_ENDPOINT: ${{ secrets.ENV_AZURE_TTS_ENDPOINT }}
+                  ENV_AZURE_TTS_KEY: ${{ secrets.ENV_AZURE_TTS_KEY }}
+                  ENV_GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
+                  ENV_AI_BACKEND: ${{ secrets.ENV_AI_BACKEND }}
+                  ENV_OPENAI_URL: ${{ secrets.ENV_OPENAI_URL }}
+                  ENV_OPENAI_API_KEY: ${{ secrets.ENV_OPENAI_API_KEY }}
+                  ENV_OPENAI_MODEL: ${{ secrets.ENV_OPENAI_MODEL }}
