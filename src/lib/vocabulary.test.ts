@@ -4,7 +4,7 @@ import { Injector } from "../bindings"
 import { _analyze, differenciate } from "./vocabulary"
 import { createEdgeTTSAPI } from "../services"
 import { promptToTranslate } from "./prompts"
-import { createTelegramBotAPI } from "@yuchanns/flamebot"
+import { createTelegramBotAPI } from "../services/telegram"
 import { createAzureAPI } from "../services/openai/azure"
 
 describe("ai", () => {

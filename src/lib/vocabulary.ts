@@ -1,7 +1,7 @@
 import toml from "markty-toml"
 import { Injector, Analyze } from "../bindings"
 import { promptToAnalyze, promptToDifferenciate, promptToTranslate, types } from "./prompts"
-import { Message } from "@yuchanns/flamebot/dist/types"
+import { Message } from "../services/telegram"
 
 export const differenciate = async (inj: Injector, text: string) => {
     const params = {
@@ -158,7 +158,11 @@ export const _analyze = async (inj: Injector, text: string, chat_id: number, mes
     )
 }
 
-export const translate = async ({ chat: { id: chat_id }, message_id: reply_to_message_id, text: rawText }: Message, inj: Injector) => {
+export const translate = async (
+    { chat: { id: chat_id }, message_id: reply_to_message_id, text: rawText, from }: Message,
+    inj: Injector,
+    vocabulary?: KVNamespace
+) => {
     const {
         result: { message_id },
     } = await inj.bot.sendMessage({
@@ -171,6 +175,11 @@ export const translate = async ({ chat: { id: chat_id }, message_id: reply_to_me
     const typ = await differenciate(inj, text)
     if (typ == "word" || typ == "phrase") {
         await _analyze(inj, text, chat_id, message_id, reply_to_message_id)
+        // Store vocabulary if available
+        if (vocabulary && from) {
+            const { storeVocabulary } = await import("./quiz")
+            await storeVocabulary(vocabulary, from.id, text.trim())
+        }
     } else {
         // FIXME: issue of type out of range
         await _translate(inj, text, chat_id, message_id, reply_to_message_id)
