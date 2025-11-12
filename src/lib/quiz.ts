@@ -658,18 +658,60 @@ export const handleQuizAnswer = async (
             try {
                 await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)
             } catch (error) {
-                console.error(`Failed to send next question (index ${nextIndex}):`, error)
-                // Try to notify user about the error
+                const failedQuestion = quiz.questions[nextIndex]
+                const errorMsg = error instanceof Error ? error.message : String(error)
+                console.error(
+                    `Failed to send question: type="${failedQuestion.type}", word="${failedQuestion.word}", index=${nextIndex}, error:`,
+                    error
+                )
+
+                // Mark this question as skipped (score 0)
+                quiz.answers[nextIndex] = 0
+                await drizzle
+                    .update(quizState)
+                    .set({
+                        answers: JSON.stringify(quiz.answers),
+                    })
+                    .where(eq(quizState.userId, userId))
+
+                // Notify user about the skipped question
                 try {
                     await bot.sendMessage({
                         chat_id,
-                        text: `⚠️ 发送下一题时出错，测验已中止。请重新开始。\n错误: ${error instanceof Error ? error.message : String(error)}`,
+                        text: `⚠️ 第 ${nextIndex + 1} 题发送失败，已跳过。\n\n题型：${failedQuestion.type}\n单词：${failedQuestion.word}\n错误：${errorMsg}\n\n请截图此信息以便回报bug。`,
                     })
                 } catch (notifyError) {
-                    console.error("Failed to notify user about error:", notifyError)
+                    console.error("Failed to notify user about skipped question:", notifyError)
                 }
-                // Clean up quiz state since we can't continue
-                await drizzle.delete(quizState).where(eq(quizState.userId, userId))
+
+                // Find next unanswered question and continue
+                const nextNextIndex = quiz.answers.findIndex((a, idx) => idx > nextIndex && a === -1)
+                if (nextNextIndex !== -1) {
+                    // Recursively try to send the next question
+                    try {
+                        await sendQuizQuestion(inj, chat_id, quiz.questions[nextNextIndex], nextNextIndex, quiz.questions.length)
+                    } catch (recursiveError) {
+                        // If this also fails, log it and check if quiz is complete
+                        console.error(`Recursive send also failed for index ${nextNextIndex}:`, recursiveError)
+                    }
+                } else {
+                    // No more questions, check if quiz is complete
+                    const allAnswered = quiz.answers.every((a) => a !== -1)
+                    if (allAnswered) {
+                        const score = quiz.answers.reduce((sum, a) => sum + a, 0)
+                        const total = quiz.questions.length
+                        try {
+                            await bot.sendMessage({
+                                chat_id,
+                                text: `🎊 *测验完成！*\n\n你的得分：${score}/${total} (${Math.round((score / total) * 100)}%)`,
+                                parse_mode: "Markdown",
+                            })
+                        } catch (finalError) {
+                            console.error("Failed to send final score:", finalError)
+                        }
+                        await drizzle.delete(quizState).where(eq(quizState.userId, userId))
+                    }
+                }
             }
         }
     }
@@ -804,18 +846,60 @@ export const handleQuizTextAnswer = async (inj: Injector, userAnswer: string, ch
             try {
                 await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)
             } catch (error) {
-                console.error(`Failed to send next question (index ${nextIndex}):`, error)
-                // Try to notify user about the error
+                const failedQuestion = quiz.questions[nextIndex]
+                const errorMsg = error instanceof Error ? error.message : String(error)
+                console.error(
+                    `Failed to send question: type="${failedQuestion.type}", word="${failedQuestion.word}", index=${nextIndex}, error:`,
+                    error
+                )
+
+                // Mark this question as skipped (score 0)
+                quiz.answers[nextIndex] = 0
+                await drizzle
+                    .update(quizState)
+                    .set({
+                        answers: JSON.stringify(quiz.answers),
+                    })
+                    .where(eq(quizState.userId, userId))
+
+                // Notify user about the skipped question
                 try {
                     await bot.sendMessage({
                         chat_id,
-                        text: `⚠️ 发送下一题时出错，测验已中止。请重新开始。\n错误: ${error instanceof Error ? error.message : String(error)}`,
+                        text: `⚠️ 第 ${nextIndex + 1} 题发送失败，已跳过。\n\n题型：${failedQuestion.type}\n单词：${failedQuestion.word}\n错误：${errorMsg}\n\n请截图此信息以便回报bug。`,
                     })
                 } catch (notifyError) {
-                    console.error("Failed to notify user about error:", notifyError)
+                    console.error("Failed to notify user about skipped question:", notifyError)
                 }
-                // Clean up quiz state since we can't continue
-                await drizzle.delete(quizState).where(eq(quizState.userId, userId))
+
+                // Find next unanswered question and continue
+                const nextNextIndex = quiz.answers.findIndex((a, idx) => idx > nextIndex && a === -1)
+                if (nextNextIndex !== -1) {
+                    // Recursively try to send the next question
+                    try {
+                        await sendQuizQuestion(inj, chat_id, quiz.questions[nextNextIndex], nextNextIndex, quiz.questions.length)
+                    } catch (recursiveError) {
+                        // If this also fails, log it and check if quiz is complete
+                        console.error(`Recursive send also failed for index ${nextNextIndex}:`, recursiveError)
+                    }
+                } else {
+                    // No more questions, check if quiz is complete
+                    const allAnswered = quiz.answers.every((a) => a !== -1)
+                    if (allAnswered) {
+                        const score = quiz.answers.reduce((sum, a) => sum + a, 0)
+                        const total = quiz.questions.length
+                        try {
+                            await bot.sendMessage({
+                                chat_id,
+                                text: `🎊 *测验完成！*\n\n你的得分：${score}/${total} (${Math.round((score / total) * 100)}%)`,
+                                parse_mode: "Markdown",
+                            })
+                        } catch (finalError) {
+                            console.error("Failed to send final score:", finalError)
+                        }
+                        await drizzle.delete(quizState).where(eq(quizState.userId, userId))
+                    }
+                }
             }
         }
     }
