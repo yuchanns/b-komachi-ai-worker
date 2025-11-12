@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { Hono } from "hono/tiny"
 import { logger } from "hono/logger"
 import { HTTPException } from "hono/http-exception"
 import { Bindings } from "./bindings"
