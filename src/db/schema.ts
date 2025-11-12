@@ -35,3 +35,17 @@ export const quizState = sqliteTable(
         expiresAtIdx: index("idx_quiz_state_expires_at").on(table.expiresAt),
     })
 )
+
+// User interactions table to track daily first interaction for tips
+export const userInteractions = sqliteTable(
+    "user_interactions",
+    {
+        userId: integer("user_id").notNull(),
+        interactionDate: text("interaction_date").notNull(),
+    },
+    (table) => ({
+        pk: index("pk_user_interactions").on(table.userId, table.interactionDate),
+        userIdIdx: index("idx_user_interactions_user_id").on(table.userId),
+        dateIdx: index("idx_user_interactions_date").on(table.interactionDate),
+    })
+)

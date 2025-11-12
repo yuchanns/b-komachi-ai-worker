@@ -37,13 +37,12 @@ CREATE TABLE IF NOT EXISTS quiz_state (
 
 CREATE INDEX IF NOT EXISTS idx_quiz_state_expires_at ON quiz_state(expires_at);
 
--- Quiz state table to store active quiz sessions
-CREATE TABLE IF NOT EXISTS quiz_state (
-    user_id INTEGER PRIMARY KEY,
-    questions TEXT NOT NULL,
-    answers TEXT NOT NULL,
-    created_at INTEGER NOT NULL,
-    expires_at INTEGER NOT NULL
+-- User interactions table to track daily first interaction for tips
+CREATE TABLE IF NOT EXISTS user_interactions (
+    user_id INTEGER NOT NULL,
+    interaction_date TEXT NOT NULL,
+    PRIMARY KEY (user_id, interaction_date)
 );
 
-CREATE INDEX IF NOT EXISTS idx_quiz_state_expires_at ON quiz_state(expires_at);
+CREATE INDEX IF NOT EXISTS idx_user_interactions_user_id ON user_interactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_interactions_date ON user_interactions(interaction_date);
