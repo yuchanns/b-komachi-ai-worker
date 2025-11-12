@@ -616,8 +616,15 @@ export const handleQuizAnswer = async (
         word_form: "📝",
     }
 
+    // Helper function to escape Markdown characters
+    const escapeMarkdownForResult = (text: string) => {
+        // Escape underscores to prevent Markdown parsing issues
+        return text.replace(/_/g, "\\_")
+    }
+
     let resultText =
-        `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${quiz.questions.length}*\n\n` + `${question.question}\n\n`
+        `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${quiz.questions.length}*\n\n` +
+        `${escapeMarkdownForResult(question.question)}\n\n`
 
     question.options.forEach((option, index) => {
         const prefix = String.fromCharCode(65 + index)
@@ -638,7 +645,7 @@ export const handleQuizAnswer = async (
 
     // Add explanation if available
     if (question.explanation) {
-        resultText += `\n\n💡 ${question.explanation}`
+        resultText += `\n\n💡 ${escapeMarkdownForResult(question.explanation)}`
     }
 
     await bot.editMessageText({
