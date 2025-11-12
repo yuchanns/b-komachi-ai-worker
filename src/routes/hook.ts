@@ -16,7 +16,6 @@ import {
     createI18nForUser,
     I18n,
     setUserLanguage,
-    Locale,
 } from "../lib"
 import { Update } from "../services/telegram"
 
@@ -92,7 +91,7 @@ hook.post(WEBHOOK, async (c) => {
             }
 
             const args = text?.split(/\s+/)
-            const langCode = args?.[1]?.toLowerCase()
+            const langCode = args?.[1]
 
             if (!langCode) {
                 // Show current language and available languages
@@ -103,8 +102,8 @@ hook.post(WEBHOOK, async (c) => {
                     parse_mode: "Markdown",
                 })
             } else if (I18n.isValidLocale(langCode)) {
-                // Set user's preferred language
-                const locale = langCode as Locale
+                // Set user's preferred language (normalize the code)
+                const locale = I18n.normalizeLocale(langCode)!
                 await setUserLanguage(db, from.id, locale)
 
                 // Switch i18n instance to new language for confirmation message
@@ -202,7 +201,7 @@ hook.post(WEBHOOK, async (c) => {
                     text: i18n.t("quiz.generating"),
                 })
 
-                const questions = await generateQuiz({ bot, ai, tts }, priorityWords)
+                const questions = await generateQuiz({ bot, ai, tts }, priorityWords, i18n)
 
                 if (questions.length === 0) {
                     await bot.sendMessage({

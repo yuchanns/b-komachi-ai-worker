@@ -3,6 +3,7 @@ import { InlineKeyboardMarkup } from "../services/telegram"
 import { createDrizzleClient } from "../db"
 import { vocabulary, quizState } from "../db/schema"
 import { eq, desc, lt, sql } from "drizzle-orm"
+import { I18n } from "./i18n"
 
 // Store vocabulary for a user using Drizzle ORM
 export const storeVocabulary = async (db: D1Database, userId: number, word: string) => {
@@ -116,151 +117,17 @@ const QUIZ_PATTERNS: QuestionType[][] = [
 ]
 
 // Generate a single quiz question of a specific type
-const promptToGenerateQuestion = (word: string, type: QuestionType) => {
-    const prompts = {
-        meaning: {
-            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道词义选择题。
+const promptToGenerateQuestion = (word: string, type: QuestionType, i18n: I18n) => {
+    // Get the system prompt from i18n, replacing {word} placeholder
+    const systemPrompt = i18n.t(`prompts.quiz.${type}.system`, { word })
 
-要求：
-- 询问单词的中文含义
-- 提供4个选项（一个正确答案，三个迷惑选项）
-- 迷惑选项要有一定相似性但明确可辨
-
-返回 JSON 格式：
-{
-    "type": "meaning",
-    "word": "${word}",
-    "question": "问题文本",
-    "correct_answer": "正确的中文含义",
-    "options": ["正确答案", "选项2", "选项3", "选项4"],
-    "correct_index": 0,
-    "explanation": "可选的解释"
-}
-
-只返回 JSON，不要 markdown 格式。`,
-            user: `为单词 "${word}" 生成词义选择题。`,
-        },
-        fill_blank: {
-            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道填空题。
-
-要求：
-- 给出一个包含 ___ 标记的英文句子
-- ___ 的位置应该填入单词"${word}"
-- 提供4个选项（包括正确答案和3个语法上可能但语义不对的选项）
-
-返回 JSON 格式：
-{
-    "type": "fill_blank",
-    "word": "${word}",
-    "question": "句子，例如：The ___ is very important. 应该填入哪个单词？",
-    "correct_answer": "${word}",
-    "options": ["${word}", "选项2", "选项3", "选项4"],
-    "correct_index": 0,
-    "explanation": "可选的解释"
-}
-
-只返回 JSON，不要 markdown 格式。`,
-            user: `为单词 "${word}" 生成填空题，必须在句子中使用 ___ 标记。`,
-        },
-        synonym: {
-            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道同义词或反义词选择题。
-
-要求：
-- 询问单词的同义词或反义词
-- 提供4个选项
-
-返回 JSON 格式：
-{
-    "type": "synonym",
-    "word": "${word}",
-    "question": "问题文本",
-    "correct_answer": "正确答案",
-    "options": ["正确答案", "选项2", "选项3", "选项4"],
-    "correct_index": 0,
-    "explanation": "可选的解释"
-}
-
-只返回 JSON，不要 markdown 格式。`,
-            user: `为单词 "${word}" 生成同义词或反义词选择题。`,
-        },
-        translation_input: {
-            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道英译中翻译题。
-
-要求：
-- 给出一个包含单词"${word}"的英文句子
-- 让用户输入中文翻译
-- 这是输入题，不需要选项
-
-返回 JSON 格式：
-{
-    "type": "translation_input",
-    "word": "${word}",
-    "question": "请将以下英文翻译成中文：\\n\\"英文句子\\"",
-    "correct_answer": "参考中文翻译",
-    "options": [],
-    "correct_index": -1,
-    "isInputBased": true,
-    "explanation": "可选的解释"
-}
-
-只返回 JSON，不要 markdown 格式。`,
-            user: `为单词 "${word}" 生成英译中翻译题。`,
-        },
-        translation_cn_to_en: {
-            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道中译英翻译题。
-
-要求：
-- 给出一个中文句子
-- 要求用户使用单词"${word}"翻译成英文
-- 这是输入题，不需要选项
-
-返回 JSON 格式：
-{
-    "type": "translation_cn_to_en",
-    "word": "${word}",
-    "question": "请使用单词 \\"${word}\\" 将以下中文翻译成英文：\\n\\"中文句子\\"",
-    "correct_answer": "参考英文翻译",
-    "options": [],
-    "correct_index": -1,
-    "isInputBased": true,
-    "explanation": "可选的解释"
-}
-
-只返回 JSON，不要 markdown 格式。`,
-            user: `为单词 "${word}" 生成中译英翻译题。`,
-        },
-        word_form: {
-            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道词形变化题。
-
-要求：
-- 给出一个语境
-- 让用户选择正确的词形（时态、单复数等）
-- 提供4个选项
-
-返回 JSON 格式：
-{
-    "type": "word_form",
-    "word": "${word}",
-    "question": "问题文本",
-    "correct_answer": "正确的词形",
-    "options": ["正确答案", "选项2", "选项3", "选项4"],
-    "correct_index": 0,
-    "explanation": "可选的解释"
-}
-
-只返回 JSON，不要 markdown 格式。`,
-            user: `为单词 "${word}" 生成词形变化题。`,
-        },
-    }
-
-    const prompt = prompts[type]
     return [
-        { role: "system", content: prompt.system },
-        { role: "user", content: prompt.user },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Generate a ${type} question for the word "${word}".` },
     ]
 }
 
-export const generateQuiz = async (inj: Injector, words: string[]): Promise<QuizQuestion[]> => {
+export const generateQuiz = async (inj: Injector, words: string[], i18n: I18n): Promise<QuizQuestion[]> => {
     if (words.length === 0) {
         return []
     }
@@ -279,7 +146,7 @@ export const generateQuiz = async (inj: Injector, words: string[]): Promise<Quiz
 
         try {
             const params = {
-                messages: promptToGenerateQuestion(word, type),
+                messages: promptToGenerateQuestion(word, type, i18n),
                 temperature: 0.7,
             }
 

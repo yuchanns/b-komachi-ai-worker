@@ -23,6 +23,24 @@ const locales: Record<Locale, LocaleData> = {
 const DEFAULT_LOCALE: Locale = "zh-CN"
 
 /**
+ * Normalize locale code to match our Locale type
+ * Handles case-insensitive matching (e.g., "zh-cn" -> "zh-CN", "EN" -> "en")
+ */
+function normalizeLocaleCode(code: string): Locale | null {
+    const normalized = code.toLowerCase()
+
+    if (normalized === "en") {
+        return "en"
+    }
+
+    if (normalized === "zh-cn") {
+        return "zh-CN"
+    }
+
+    return null
+}
+
+/**
  * Get a nested value from an object using a dot-separated path
  */
 function getNestedValue(obj: Record<string, any>, path: string): any {
@@ -94,10 +112,17 @@ export class I18n {
     }
 
     /**
-     * Check if a locale is supported
+     * Check if a locale is supported (case-insensitive)
      */
     static isValidLocale(locale: string): locale is Locale {
-        return locale in locales
+        return normalizeLocaleCode(locale) !== null
+    }
+
+    /**
+     * Normalize a locale code to the correct format
+     */
+    static normalizeLocale(locale: string): Locale | null {
+        return normalizeLocaleCode(locale)
     }
 
     /**

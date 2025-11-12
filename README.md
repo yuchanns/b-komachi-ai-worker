@@ -60,6 +60,7 @@ For example:
 - `/lang en` - Switch to English
 
 **Auto-Detection**: On your first interaction, the bot will automatically detect your language from your Telegram client settings and set it as your preference. Supported Telegram language codes include:
+
 - English: `en`
 - Chinese (Simplified): `zh`, `zh-hans`, `zh-cn`
 - Chinese (Traditional): `zh-hant`, `zh-tw`, `zh-hk` (mapped to Simplified Chinese)
