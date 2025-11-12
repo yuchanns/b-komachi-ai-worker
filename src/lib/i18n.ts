@@ -25,7 +25,7 @@ const DEFAULT_LOCALE: Locale = "zh-CN"
 /**
  * Get a nested value from an object using a dot-separated path
  */
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: Record<string, any>, path: string): any {
     return path.split(".").reduce((acc, part) => acc?.[part], obj)
 }
 
@@ -229,7 +229,15 @@ export function formatHelpMessage(i18n: I18n): string {
  * Format tips message using translations
  */
 export function formatTipsMessage(i18n: I18n): string {
-    const sections = [i18n.t("tips.title"), "", i18n.t("tips.help_command"), i18n.t("tips.quiz_command"), i18n.t("tips.query_hint"), "", i18n.t("tips.closing")]
+    const sections = [
+        i18n.t("tips.title"),
+        "",
+        i18n.t("tips.help_command"),
+        i18n.t("tips.quiz_command"),
+        i18n.t("tips.query_hint"),
+        "",
+        i18n.t("tips.closing"),
+    ]
 
     return sections.join("\n").trim()
 }

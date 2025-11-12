@@ -1,127 +1,127 @@
 {
-  "help": {
-    "title": "📚 *B-Komachi AI Vocabulary Assistant Guide*",
-    "vocabulary_query": {
-      "title": "*🔍 Word Lookup*",
-      "description": "Mention me in a group or private chat with a word or phrase:",
-      "example": "`@bot_name sophisticated`",
-      "features": [
-        "• Pronunciation (IPA notation)",
-        "• Detailed meanings and examples",
-        "• Etymology, derivatives, synonyms, and related words",
-        "• Voice pronunciation",
-        "• Automatically saved to your vocabulary history"
-      ]
+    "help": {
+        "title": "📚 *B-Komachi AI Vocabulary Assistant Guide*",
+        "vocabulary_query": {
+            "title": "*🔍 Word Lookup*",
+            "description": "Mention me in a group or private chat with a word or phrase:",
+            "example": "`@bot_name sophisticated`",
+            "features": [
+                "• Pronunciation (IPA notation)",
+                "• Detailed meanings and examples",
+                "• Etymology, derivatives, synonyms, and related words",
+                "• Voice pronunciation",
+                "• Automatically saved to your vocabulary history"
+            ]
+        },
+        "quiz": {
+            "title": "*📝 Daily Quiz*",
+            "description": "Start a quiz based on your vocabulary history:",
+            "command": "`/quiz`",
+            "features": [
+                "• Multiple-choice questions generated from your vocabulary",
+                "• Interactive buttons with 4 options for each question",
+                "• Instant feedback on correct/incorrect answers",
+                "• Final score display",
+                "• Prioritizes words that need more practice"
+            ],
+            "note": "_Note: You need to query at least a few words before using the quiz feature_"
+        },
+        "model_switch": {
+            "title": "*🤖 Switch AI Model*",
+            "description": "View and switch AI models:",
+            "view_command": "`/model` - View available models",
+            "switch_command": "`/model <backend>` - Switch model",
+            "supported": "Supported backends: azure, gemini, openai",
+            "example": "Example: `/model gemini`"
+        },
+        "language": {
+            "title": "*🌍 Switch Language*",
+            "description": "View and switch interface language:",
+            "view_command": "`/lang` - View current language",
+            "switch_command": "`/lang <code>` - Switch language",
+            "supported": "Supported languages: zh-CN (中文), en (English)",
+            "example": "Example: `/lang zh-CN`"
+        },
+        "help_command": {
+            "title": "*💡 Help*",
+            "description": "Send `/help` anytime to view this help message"
+        },
+        "closing": "Happy learning! 🌟"
     },
-    "quiz": {
-      "title": "*📝 Daily Quiz*",
-      "description": "Start a quiz based on your vocabulary history:",
-      "command": "`/quiz`",
-      "features": [
-        "• Multiple-choice questions generated from your vocabulary",
-        "• Interactive buttons with 4 options for each question",
-        "• Instant feedback on correct/incorrect answers",
-        "• Final score display",
-        "• Prioritizes words that need more practice"
-      ],
-      "note": "_Note: You need to query at least a few words before using the quiz feature_"
+    "tips": {
+        "title": "💡 *Usage Tips*",
+        "help_command": "Send `/help` to view the complete guide",
+        "quiz_command": "Send `/quiz` to start a vocabulary quiz",
+        "query_hint": "@ me with a word to look up its meaning",
+        "closing": "Happy learning!"
     },
-    "model_switch": {
-      "title": "*🤖 Switch AI Model*",
-      "description": "View and switch AI models:",
-      "view_command": "`/model` - View available models",
-      "switch_command": "`/model <backend>` - Switch model",
-      "supported": "Supported backends: azure, gemini, openai",
-      "example": "Example: `/model gemini`"
+    "model": {
+        "current": "🤖 *Current AI Model*\nCurrently using: *{backend}*",
+        "available": "\n\n*Available Models*",
+        "switch_hint": "\n\n💡 Use `/model <backend>` to switch models\nExample: `/model gemini`",
+        "switched": "✅ Switched to *{backend}* model",
+        "not_configured": "❌ Model *{backend}* is not configured",
+        "invalid": "❌ Invalid model name: *{backend}*\n\nPlease use one of: {available}"
     },
     "language": {
-      "title": "*🌍 Switch Language*",
-      "description": "View and switch interface language:",
-      "view_command": "`/lang` - View current language",
-      "switch_command": "`/lang <code>` - Switch language",
-      "supported": "Supported languages: zh-CN (中文), en (English)",
-      "example": "Example: `/lang zh-CN`"
-    },
-    "help_command": {
-      "title": "*💡 Help*",
-      "description": "Send `/help` anytime to view this help message"
-    },
-    "closing": "Happy learning! 🌟"
-  },
-  "tips": {
-    "title": "💡 *Usage Tips*",
-    "help_command": "Send `/help` to view the complete guide",
-    "quiz_command": "Send `/quiz` to start a vocabulary quiz",
-    "query_hint": "@ me with a word to look up its meaning",
-    "closing": "Happy learning!"
-  },
-  "model": {
-    "current": "🤖 *Current AI Model*\nCurrently using: *{backend}*",
-    "available": "\n\n*Available Models*",
-    "switch_hint": "\n\n💡 Use `/model <backend>` to switch models\nExample: `/model gemini`",
-    "switched": "✅ Switched to *{backend}* model",
-    "not_configured": "❌ Model *{backend}* is not configured",
-    "invalid": "❌ Invalid model name: *{backend}*\n\nPlease use one of: {available}"
-  },
-  "language": {
-    "current": "🌍 *Current Language*\nCurrently using: *English* (en)",
-    "available": "\n\n*Available Languages*\n• `zh-CN` - 中文\n• `en` - English",
-    "switch_hint": "\n\n💡 Use `/lang <code>` to switch language\nExample: `/lang zh-CN`",
-    "switched": "✅ Language switched to English",
-    "invalid": "❌ Unsupported language code: *{code}*\n\nPlease use: `zh-CN` or `en`"
-  },
-  "quiz": {
-    "not_enough_words": "❌ Insufficient vocabulary\n\nYou need at least *{min}* words to start a quiz.\nCurrent vocabulary: *{current}*\n\n💡 @ me with words to build your vocabulary!",
-    "generating": "⏳ Generating quiz...",
-    "generation_error": "❌ Error generating quiz. Please try again later.",
-    "question_prefix": "*Question {current}/{total}*",
-    "correct": "✅ *Correct!*",
-    "incorrect": "❌ *Incorrect!*\nThe correct answer is: *{answer}*",
-    "explanation": "\n\n💡 {explanation}",
-    "score": "🎉 *Quiz Complete!*\n\nYour score: *{score}/{total}*",
-    "score_excellent": "\n\nExcellent! 🌟",
-    "score_good": "\n\nGood job! Keep it up! 💪",
-    "score_needs_improvement": "\n\nKeep practicing! Review will help! 📚"
-  },
-  "error": {
-    "database_not_configured": "⚠️ Database not configured. Please contact the administrator.",
-    "general": "❌ Error occurred: {message}"
-  },
-  "prompts": {
-    "differentiate": {
-      "system": "As a user representative, you need to act as an English text classification tool, with the task of accurately classifying English text submitted by users.\nThe classification criteria are the following three categories: [\"word\",\"phrase\",\"sentence\"]. You need to evaluate each input and then classify it into the appropriate category.\nHere are specific operating guidelines:\n- If the input is a single word, you should reply \"word\".\n- If the input is a phrase but not a complete sentence, you should reply \"phrase\".\n- If the input is a complete sentence, you should reply \"sentence\".\nPlease make sure your answer is concise and clear, directly giving the classification result without providing additional explanations or comments. Here are a few examples to help you understand the task:\n- Input: prevalent\n  Your output should be: word\n- Input: he is a boy\n  Your output should be: sentence\n- Input: real estate\n  Your output should be: phrase\nPlease follow these guidelines to ensure that each response is accurate.",
-      "assistant": "Okay, I understand. Please give me the input.",
-      "user": "Input: {text}: "
-    },
-    "translate": {
-      "system": "You are now an advanced English translation engine, responsible for translating English sentences provided by users, and operating according to the following clear steps:\n1. Translate the sentence directly without providing any additional explanations or instructions.\n2. If the user provides a sentence with grammatical errors, it should be automatically corrected to what you consider to be the most likely correct grammatical form, without pointing out spelling errors to the user.\n3. List all the grammar and sentence patterns used in the sentence, and provide at least one bilingual example sentence in both Chinese and English for each pattern, ensuring that at least three example sentences are provided overall.\nWhen executing these instructions, please ensure that the translation content you provide is both accurate and comprehensive, and display all information in a clear, well-organized toml format.\nFor example:\nInput: The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours.\nYour output should be:\n[sentence]\norigin = \"The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours.\"\ntext = \"那个小女孩哭得伤心欲绝，当我跟她说话时，她说她很难过，因为两个小时没见到她妈妈了。\"\n[[grammar]]\ntype = \"名词短语\"\ntext = \"The little girl\"\nexample_sentence = \"The tall boy with the red hat\"\nexample_translation = \"戴着红帽子的高个男孩\"\n[[grammar]]\ntype = \"定语从句\"\ntext = \"who is crying as if her heart would break\"\nexample_sentence = \"which is known for its beautiful beaches\"\nexample_translation = \"以其美丽的海滩而闻名\"\n[[grammar]]\ntype = \"动词短语\"\ntext = \"said, when I spoke to her\"\nexample_sentence = \"has been working on this project for months\"\nexample_translation = \"已经在这个项目上工作了几个月\"",
-      "assistant": "Okay, I understand. Please give me the input.",
-      "user": "Input: {text} "
-    },
-    "analyze": {
-      "system": "You are now an advanced English translation engine, responsible for translating English words provided by users, and operating according to the following clear steps:\n1. Translate the word directly without providing any additional explanations or instructions.\n2. If the user provides a word with spelling errors, it should be automatically corrected to what you consider to be the most likely correct word form, without pointing out spelling errors to the user.\n3. You need to provide its original form and attach the corresponding American phonetic notation.\n4. List all meanings of the word, including parts of speech, and provide at least one bilingual example sentence in both Chinese and English for each meaning, ensuring that at least three example sentences are provided overall.\n5. List the roots, prefixes, and suffixes related to the word.\n6. Provide derivatives related to the word.\n7. List synonyms of the word.\n8. List similar-looking words.\nWhen executing these instructions, please ensure that the translation content you provide is both accurate and comprehensive, and display all information in a clear, well-organized toml format.\nFor example:\nInput: like\nYour output should be:\n[word]\ntext = \"like\"\n[pronunciation]\nipa = \"/laɪk/\"\n[[meaning]]\npart_of_speech = \"v.\"\ndefinitions = [\"喜欢\", \"喜爱\"]\n[[meaning]]\npart_of_speech = \"prep.\"\ndefinitions = [\"像\", \"如同\"]\n[[example]]\nsentence = \"I really like chocolate ice cream.\"\ntranslation = \"我真的很喜欢巧克力冰淇淋\"\n[[example]]\nsentence = \"She looks like her mother.\"\ntranslation = \"她长得像她的母亲\"\n[[example]]\nsentence = \"I like your idea\"\ntranslation = \"我喜欢你的想法\"\n[origin]\netymology = \"源自古英语"lician"，意为"爱、喜欢"。\"\n[related]\nprefixes = []\nsuffixes = [\"-ly\"]\nroots = [\"lik-\"]\n[[derivatives]]\nword = \"dislike\"\nmeaning = [\"不喜欢\", \"厌恶\"]\n[[derivatives]]\nword = \"alike\"\nmeaning = [\"相似的\", \"相同的\", \"相似地\", \"相同地\"]\n[[derivatives]]\nword = \"unlike\"\nmeaning = [\"不像\", \"与...不同\"]\n[[synonyms]]\nword = \"love\"\nmeaning = [\"爱\", \"情感\"]\n[[synonyms]]\nword = \"enjoy\"\nmeaning = [\"享受\", \"喜爱\"]\n[[synonyms]]\nword = \"adore\"\nmeaning = [\"崇拜\", \"爱慕\"]\n[[synonyms]]\nword = \"appreciate\"\nmeaning = [\"欣赏\", \"感激\", \"重视\"]\n[[homophones]]\nword = \"hike\"\nmeaning = [\"远足\", \"徒步\"]\n[[homophones]]\nword = \"bike\"\nmeaning = [\"自行车\"]",
-      "assistant": "Okay, I understand. Please give me the input.",
-      "user": "Input: {text} "
+        "current": "🌍 *Current Language*\nCurrently using: *English* (en)",
+        "available": "\n\n*Available Languages*\n• `zh-CN` - 中文\n• `en` - English",
+        "switch_hint": "\n\n💡 Use `/lang <code>` to switch language\nExample: `/lang zh-CN`",
+        "switched": "✅ Language switched to English",
+        "invalid": "❌ Unsupported language code: *{code}*\n\nPlease use: `zh-CN` or `en`"
     },
     "quiz": {
-      "meaning": {
-        "system": "You are a professional English vocabulary quiz generator. Please generate a word meaning multiple-choice question for the word \"{word}\".\n\nRequirements:\n1. Provide an accurate question\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"meaning\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
-      },
-      "usage": {
-        "system": "You are a professional English vocabulary quiz generator. Please generate a fill-in-the-blank question for the word \"{word}\".\n\nRequirements:\n1. Provide a sentence with a blank (use ___ to represent the blank)\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"usage\",\n  \"word\": \"{word}\",\n  \"question\": \"Sentence with ___\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
-      },
-      "synonym": {
-        "system": "You are a professional English vocabulary quiz generator. Please generate a synonym or antonym multiple-choice question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about synonyms or antonyms\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"synonym\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
-      },
-      "translation": {
-        "system": "You are a professional English vocabulary quiz generator. Please generate an English-to-Chinese translation question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about the Chinese meaning of the word\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"translation\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
-      },
-      "translation_input": {
-        "system": "You are a professional English vocabulary quiz generator. Please generate a Chinese-to-English translation question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about the English spelling of the word (give Chinese, require English input)\n2. Provide the correct English answer\n3. Provide a brief explanation\n4. Set isInputBased to true\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"translation_input\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"isInputBased\": true,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
-      },
-      "word_form": {
-        "system": "You are a professional English vocabulary quiz generator. Please generate a word form question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about word form changes (e.g., noun, adjective, adverb forms)\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"word_form\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
-      }
+        "not_enough_words": "❌ Insufficient vocabulary\n\nYou need at least *{min}* words to start a quiz.\nCurrent vocabulary: *{current}*\n\n💡 @ me with words to build your vocabulary!",
+        "generating": "⏳ Generating quiz...",
+        "generation_error": "❌ Error generating quiz. Please try again later.",
+        "question_prefix": "*Question {current}/{total}*",
+        "correct": "✅ *Correct!*",
+        "incorrect": "❌ *Incorrect!*\nThe correct answer is: *{answer}*",
+        "explanation": "\n\n💡 {explanation}",
+        "score": "🎉 *Quiz Complete!*\n\nYour score: *{score}/{total}*",
+        "score_excellent": "\n\nExcellent! 🌟",
+        "score_good": "\n\nGood job! Keep it up! 💪",
+        "score_needs_improvement": "\n\nKeep practicing! Review will help! 📚"
+    },
+    "error": {
+        "database_not_configured": "⚠️ Database not configured. Please contact the administrator.",
+        "general": "❌ Error occurred: {message}"
+    },
+    "prompts": {
+        "differentiate": {
+            "system": "As a user representative, you need to act as an English text classification tool, with the task of accurately classifying English text submitted by users.\nThe classification criteria are the following three categories: [\"word\",\"phrase\",\"sentence\"]. You need to evaluate each input and then classify it into the appropriate category.\nHere are specific operating guidelines:\n- If the input is a single word, you should reply \"word\".\n- If the input is a phrase but not a complete sentence, you should reply \"phrase\".\n- If the input is a complete sentence, you should reply \"sentence\".\nPlease make sure your answer is concise and clear, directly giving the classification result without providing additional explanations or comments. Here are a few examples to help you understand the task:\n- Input: prevalent\n  Your output should be: word\n- Input: he is a boy\n  Your output should be: sentence\n- Input: real estate\n  Your output should be: phrase\nPlease follow these guidelines to ensure that each response is accurate.",
+            "assistant": "Okay, I understand. Please give me the input.",
+            "user": "Input: {text}: "
+        },
+        "translate": {
+            "system": "You are now an advanced English translation engine, responsible for translating English sentences provided by users, and operating according to the following clear steps:\n1. Translate the sentence directly without providing any additional explanations or instructions.\n2. If the user provides a sentence with grammatical errors, it should be automatically corrected to what you consider to be the most likely correct grammatical form, without pointing out spelling errors to the user.\n3. List all the grammar and sentence patterns used in the sentence, and provide at least one bilingual example sentence in both Chinese and English for each pattern, ensuring that at least three example sentences are provided overall.\nWhen executing these instructions, please ensure that the translation content you provide is both accurate and comprehensive, and display all information in a clear, well-organized toml format.\nFor example:\nInput: The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours.\nYour output should be:\n[sentence]\norigin = \"The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours.\"\ntext = \"那个小女孩哭得伤心欲绝，当我跟她说话时，她说她很难过，因为两个小时没见到她妈妈了。\"\n[[grammar]]\ntype = \"名词短语\"\ntext = \"The little girl\"\nexample_sentence = \"The tall boy with the red hat\"\nexample_translation = \"戴着红帽子的高个男孩\"\n[[grammar]]\ntype = \"定语从句\"\ntext = \"who is crying as if her heart would break\"\nexample_sentence = \"which is known for its beautiful beaches\"\nexample_translation = \"以其美丽的海滩而闻名\"\n[[grammar]]\ntype = \"动词短语\"\ntext = \"said, when I spoke to her\"\nexample_sentence = \"has been working on this project for months\"\nexample_translation = \"已经在这个项目上工作了几个月\"",
+            "assistant": "Okay, I understand. Please give me the input.",
+            "user": "Input: {text} "
+        },
+        "analyze": {
+            "system": "You are now an advanced English translation engine, responsible for translating English words provided by users, and operating according to the following clear steps:\n1. Translate the word directly without providing any additional explanations or instructions.\n2. If the user provides a word with spelling errors, it should be automatically corrected to what you consider to be the most likely correct word form, without pointing out spelling errors to the user.\n3. You need to provide its original form and attach the corresponding American phonetic notation.\n4. List all meanings of the word, including parts of speech, and provide at least one bilingual example sentence in both Chinese and English for each meaning, ensuring that at least three example sentences are provided overall.\n5. List the roots, prefixes, and suffixes related to the word.\n6. Provide derivatives related to the word.\n7. List synonyms of the word.\n8. List similar-looking words.\nWhen executing these instructions, please ensure that the translation content you provide is both accurate and comprehensive, and display all information in a clear, well-organized toml format.\nFor example:\nInput: like\nYour output should be:\n[word]\ntext = \"like\"\n[pronunciation]\nipa = \"/laɪk/\"\n[[meaning]]\npart_of_speech = \"v.\"\ndefinitions = [\"喜欢\", \"喜爱\"]\n[[meaning]]\npart_of_speech = \"prep.\"\ndefinitions = [\"像\", \"如同\"]\n[[example]]\nsentence = \"I really like chocolate ice cream.\"\ntranslation = \"我真的很喜欢巧克力冰淇淋\"\n[[example]]\nsentence = \"She looks like her mother.\"\ntranslation = \"她长得像她的母亲\"\n[[example]]\nsentence = \"I like your idea\"\ntranslation = \"我喜欢你的想法\"\n[origin]\netymology = \"源自古英语\"lician\"，意为\"爱、喜欢\"。\"\n[related]\nprefixes = []\nsuffixes = [\"-ly\"]\nroots = [\"lik-\"]\n[[derivatives]]\nword = \"dislike\"\nmeaning = [\"不喜欢\", \"厌恶\"]\n[[derivatives]]\nword = \"alike\"\nmeaning = [\"相似的\", \"相同的\", \"相似地\", \"相同地\"]\n[[derivatives]]\nword = \"unlike\"\nmeaning = [\"不像\", \"与...不同\"]\n[[synonyms]]\nword = \"love\"\nmeaning = [\"爱\", \"情感\"]\n[[synonyms]]\nword = \"enjoy\"\nmeaning = [\"享受\", \"喜爱\"]\n[[synonyms]]\nword = \"adore\"\nmeaning = [\"崇拜\", \"爱慕\"]\n[[synonyms]]\nword = \"appreciate\"\nmeaning = [\"欣赏\", \"感激\", \"重视\"]\n[[homophones]]\nword = \"hike\"\nmeaning = [\"远足\", \"徒步\"]\n[[homophones]]\nword = \"bike\"\nmeaning = [\"自行车\"]",
+            "assistant": "Okay, I understand. Please give me the input.",
+            "user": "Input: {text} "
+        },
+        "quiz": {
+            "meaning": {
+                "system": "You are a professional English vocabulary quiz generator. Please generate a word meaning multiple-choice question for the word \"{word}\".\n\nRequirements:\n1. Provide an accurate question\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"meaning\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
+            },
+            "usage": {
+                "system": "You are a professional English vocabulary quiz generator. Please generate a fill-in-the-blank question for the word \"{word}\".\n\nRequirements:\n1. Provide a sentence with a blank (use ___ to represent the blank)\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"usage\",\n  \"word\": \"{word}\",\n  \"question\": \"Sentence with ___\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
+            },
+            "synonym": {
+                "system": "You are a professional English vocabulary quiz generator. Please generate a synonym or antonym multiple-choice question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about synonyms or antonyms\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"synonym\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
+            },
+            "translation": {
+                "system": "You are a professional English vocabulary quiz generator. Please generate an English-to-Chinese translation question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about the Chinese meaning of the word\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"translation\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
+            },
+            "translation_input": {
+                "system": "You are a professional English vocabulary quiz generator. Please generate a Chinese-to-English translation question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about the English spelling of the word (give Chinese, require English input)\n2. Provide the correct English answer\n3. Provide a brief explanation\n4. Set isInputBased to true\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"translation_input\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"isInputBased\": true,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
+            },
+            "word_form": {
+                "system": "You are a professional English vocabulary quiz generator. Please generate a word form question for the word \"{word}\".\n\nRequirements:\n1. Provide a question about word form changes (e.g., noun, adjective, adverb forms)\n2. Provide 4 options (including 1 correct answer and 3 distractors)\n3. Mark the index of the correct answer (0-3)\n4. Provide a brief explanation\n\nPlease output in the following JSON format strictly:\n{{\n  \"type\": \"word_form\",\n  \"word\": \"{word}\",\n  \"question\": \"Question content\",\n  \"correct_answer\": \"Correct answer\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"Explanation content\"\n}}\n\nMake sure the output is in valid JSON format, do not add any other text."
+            }
+        }
     }
-  }
 }

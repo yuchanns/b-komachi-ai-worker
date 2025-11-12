@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/d1"
 import { userPreferences } from "../db/schema"
 import { Bindings } from "../bindings"
+import { I18n } from "./i18n"
 
 /**
  * Available AI backends
@@ -96,27 +97,32 @@ export const getBackendInfo = (backend: AIBackend, env: Bindings): { name: strin
 }
 
 /**
- * Format the model selection menu
+ * Format the model selection menu with i18n support
  */
-export const formatModelMenu = (env: Bindings, currentBackend?: AIBackend | null): string => {
+export const formatModelMenu = (env: Bindings, currentBackend?: AIBackend | null, i18n?: I18n): string => {
     const available = getAvailableBackends(env)
 
     if (available.length === 0) {
-        return "❌ 没有可用的 AI 模型配置"
+        return i18n ? i18n.t("model.not_configured") : "❌ 没有可用的 AI 模型配置"
     }
 
-    let message = "🤖 *选择 AI 模型*\n\n"
+    let message = ""
 
     if (currentBackend) {
         const info = getBackendInfo(currentBackend, env)
-        message += `当前使用：*${info.name}* (${info.model})\n\n`
+        message += i18n
+            ? i18n.t("model.current", { backend: `${info.name} (${info.model})` })
+            : `🤖 *当前 AI 模型*\n当前使用：*${info.name}* (${info.model})`
     } else {
         const defaultBackend = env.ENV_AI_BACKEND.toLowerCase() as AIBackend
         const info = getBackendInfo(defaultBackend, env)
-        message += `当前使用：*${info.name}* (${info.model}) _(默认)_\n\n`
+        message += i18n
+            ? i18n.t("model.current", { backend: `${info.name} (${info.model}) _(默认)_` })
+            : `🤖 *当前 AI 模型*\n当前使用：*${info.name}* (${info.model}) _(默认)_`
     }
 
-    message += "可用模型：\n\n"
+    message += i18n ? i18n.t("model.available") : "\n\n*可用模型*"
+    message += "\n\n"
 
     for (const backend of available) {
         const info = getBackendInfo(backend, env)
@@ -124,7 +130,7 @@ export const formatModelMenu = (env: Bindings, currentBackend?: AIBackend | null
         message += `${marker}*${backend}* - ${info.name} (${info.model})\n`
     }
 
-    message += `\n使用方式：\`/model <backend>\`\n例如：\`/model gemini\``
+    message += i18n ? i18n.t("model.switch_hint") : "\n\n💡 使用 `/model <backend>` 切换模型\n例如: `/model gemini`"
 
     return message
 }
