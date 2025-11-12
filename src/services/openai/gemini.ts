@@ -3,8 +3,8 @@ import { generateText } from "@xsai/generate-text"
 import { streamText } from "@xsai/stream-text"
 import type { AIAPI, ChatParams, Message } from "../../bindings"
 
-export const createGeminiAPI = (params: { apiKey: string }): AIAPI => {
-    const model = "gemini-2.0-flash-exp"
+export const createGeminiAPI = (params: { apiKey: string; model?: string }): AIAPI => {
+    const model = params.model || "gemini-1.5-flash"
     const baseURL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
     return {

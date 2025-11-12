@@ -34,6 +34,14 @@ export const HELP_MESSAGE = `
 
 _注意：至少需要查询几个单词才能使用测验功能_
 
+*🤖 切换 AI 模型*
+查看和切换 AI 模型：
+\`/model\` - 查看可用模型
+\`/model <backend>\` - 切换模型
+
+支持的后端：azure、gemini、openai
+例如：\`/model gemini\`
+
 *💡 帮助*
 随时发送 \`/help\` 查看此帮助信息
 
@@ -127,11 +135,11 @@ export const isUserInteraction = (update: Update, botUsername: string): boolean 
  * Register built-in interaction matchers
  */
 
-// Command matcher: /help, /quiz, etc.
+// Command matcher: /help, /quiz, /model, etc.
 registerInteraction((update: Update) => {
     const text = update.message?.text
     if (!text) return false
-    return text.startsWith("/help") || text.startsWith("/quiz")
+    return text.startsWith("/help") || text.startsWith("/quiz") || text.startsWith("/model")
 })
 
 // Vocabulary query matcher: @bot_name word

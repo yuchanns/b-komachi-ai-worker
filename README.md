@@ -14,6 +14,7 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [x] 🤖 Multiple AI support(Azure OpenAI, Gemini Pro...)
 - [x] 📝 Daily quizzes based on user-specific vocabulary.
 - [x] 💡 Help command and daily usage tips
+- [x] 🔄 Per-user AI model selection
 - [ ] 👂 Review mode for listening to speech and selecting the answer.
 - [ ] 🌎 Support for learning multiple languages.
 - [ ] 🤔 Identify unfamiliar words within sentences.
@@ -31,6 +32,34 @@ Get a quick overview of available commands and features:
 ```
 
 **Daily Tips**: The bot will automatically show usage tips on your first interaction each day to help you get the most out of its features.
+
+### Switch AI Model
+
+View available AI models and switch between them:
+
+```
+/model
+```
+
+This will show you:
+
+- Your current AI model
+- All available models based on your configuration
+- How to switch to a different model
+
+To switch to a specific model:
+
+```
+/model <backend>
+```
+
+For example:
+
+- `/model gemini` - Switch to Google Gemini
+- `/model openai` - Switch to OpenAI
+- `/model azure` - Switch to Azure OpenAI
+
+**Note**: You can configure multiple AI backends and let each user choose their preferred one. The bot remembers your choice for future interactions.
 
 ### Vocabulary Lookup
 
@@ -78,10 +107,11 @@ Users must provide the following environment variables within GitHub's Secrets -
 | ENV_AZURE_API_VERSION | Azure OpenAI API Version                                                                         | 2023-09-01-preview                                                |
 | ENV_BOT_SECRET        | Telegram Bot Verification Secret, Random Generate From `A-Z, a-z, 0-9, _ and -`                  |                                                                   |
 | ENV_BOT_TOKEN         | Telegram Bot Token                                                                               |                                                                   |
-| ENV_GEMINI_API_KEY    | Google Gemini Pro API Key                                                                        |                                                                   |
+| ENV_GEMINI_API_KEY    | Google Gemini API Key                                                                            |                                                                   |
+| ENV_GEMINI_MODEL      | Optional Gemini Model                                                                            | gemini-1.5-flash (default), gemini-2.0-flash-exp                  |
 | ENV_OPENAI_API_KEY    | OpenAI API Key                                                                                   |                                                                   |
-| ENV_OPENAI_URL        | Optional                                                                                         | https://api.openai.com                                            |
-| ENV_OPENAI_MODEL      | Optional                                                                                         | gpt-3.5-turbo                                                     |
+| ENV_OPENAI_URL        | Optional OpenAI Base URL                                                                         | https://api.openai.com                                            |
+| ENV_OPENAI_MODEL      | Optional OpenAI Model                                                                            | gpt-3.5-turbo                                                     |
 | ENV_AI_BACKEND        | Specify Which AI Backend To Use                                                                  | Optional: `Azure`, `Gemini`, `OpenAI`                             |
 
 ### D1 Database Setup

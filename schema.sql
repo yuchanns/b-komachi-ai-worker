@@ -46,3 +46,12 @@ CREATE TABLE IF NOT EXISTS user_interactions (
 
 CREATE INDEX IF NOT EXISTS idx_user_interactions_user_id ON user_interactions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_interactions_date ON user_interactions(interaction_date);
+
+-- User preferences table to store user-specific settings like AI model preference
+CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id INTEGER PRIMARY KEY,
+    ai_backend TEXT,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_preferences_user_id ON user_preferences(user_id);

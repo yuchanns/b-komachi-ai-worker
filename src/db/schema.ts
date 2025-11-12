@@ -49,3 +49,16 @@ export const userInteractions = sqliteTable(
         dateIdx: index("idx_user_interactions_date").on(table.interactionDate),
     })
 )
+
+// User preferences table to store user-specific settings
+export const userPreferences = sqliteTable(
+    "user_preferences",
+    {
+        userId: integer("user_id").primaryKey(),
+        aiBackend: text("ai_backend"),
+        updatedAt: integer("updated_at").notNull(),
+    },
+    (table) => ({
+        userIdIdx: index("idx_user_preferences_user_id").on(table.userId),
+    })
+)
