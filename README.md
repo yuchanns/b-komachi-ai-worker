@@ -59,7 +59,12 @@ For example:
 - `/lang zh-CN` - Switch to Chinese (中文)
 - `/lang en` - Switch to English
 
-**Note**: The bot remembers your language preference for future interactions. Default language is Chinese.
+**Auto-Detection**: On your first interaction, the bot will automatically detect your language from your Telegram client settings and set it as your preference. Supported Telegram language codes include:
+- English: `en`
+- Chinese (Simplified): `zh`, `zh-hans`, `zh-cn`
+- Chinese (Traditional): `zh-hant`, `zh-tw`, `zh-hk` (mapped to Simplified Chinese)
+
+**Note**: The bot remembers your language preference for future interactions. You can manually change it anytime using the `/lang` command.
 
 ### Switch AI Model
 
@@ -176,7 +181,7 @@ Before deploying, create a D1 database for vocabulary storage:
     ```bash
     # Migration 001: Add user_interactions and user_preferences tables
     wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/001_add_user_interactions_and_preferences.sql
-    
+
     # Migration 002: Add language column to user_preferences table
     wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/002_add_language_preference.sql
     ```
@@ -216,33 +221,51 @@ pnpm test -- -t '<describe> <test>'
 The bot supports multiple languages with a flexible i18n system inspired by the [deepfuture](https://github.com/cloudwu/deepfuture) project.
 
 **Supported Languages:**
+
 - Chinese (Simplified) - `zh-CN` (Default)
 - English - `en`
 
 **Architecture:**
+
 - Locale files are stored in `locales/` directory as JSON files
 - The i18n module (`src/lib/i18n.ts`) provides translation functions
 - User language preferences are stored in the database
 - Each user can choose their preferred language using `/lang <code>`
+- **Auto-detection**: On first interaction, the bot detects language from Telegram's `language_code` field and automatically saves it as the user's preference
+
+**Language Auto-Detection:**
+
+The bot uses Telegram's `language_code` field (from the User object) to automatically detect and set the user's preferred language on their first interaction. The detection mapping:
+
+- `en` → English (`en`)
+- `zh`, `zh-hans`, `zh-cn` → Chinese Simplified (`zh-CN`)
+- `zh-hant`, `zh-tw`, `zh-hk` → Chinese Simplified (`zh-CN`)
+- Other codes → Default to Chinese (`zh-CN`)
+
+Once detected and saved, the preference persists until the user manually changes it with `/lang`.
 
 **Adding a New Language:**
 
 1. Create a new locale file in `locales/` (e.g., `locales/ja.json` for Japanese)
 2. Copy the structure from `locales/en.json` and translate all strings
 3. Update `src/lib/i18n.ts` to include the new locale:
-   ```typescript
-   import ja from "../../locales/ja.json"
-   
-   const locales: Record<Locale, LocaleData> = {
-       "zh-CN": zhCN,
-       "en": en,
-       "ja": ja,  // Add new locale
-   }
-   ```
+
+    ```typescript
+    import ja from "../../locales/ja.json"
+
+    const locales: Record<Locale, LocaleData> = {
+        "zh-CN": zhCN,
+        en: en,
+        ja: ja, // Add new locale
+    }
+    ```
+
 4. Update the `Locale` type to include the new language code
-5. Update the help messages to include the new language option
+5. Update the `detectLocaleFromTelegram()` function to map Telegram language codes to your new locale
+6. Update the help messages to include the new language option
 
 **Translation Keys:**
+
 - Use dot notation for nested keys (e.g., `i18n.t("help.title")`)
 - Support placeholder interpolation with `{key}` format (e.g., `i18n.t("model.switched", { backend: "gemini" })`)
 - Arrays in locale files are automatically joined with newlines

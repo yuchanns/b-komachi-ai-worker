@@ -54,12 +54,13 @@ hook.post(WEBHOOK, async (c) => {
         return new Response("Database not configured", { status: 500 })
     }
 
-    // Get user ID for AI backend and language selection
+    // Get user ID and language code for AI backend and language selection
     const userId = update.message?.from?.id || update.callback_query?.from?.id
+    const telegramLanguageCode = update.message?.from?.language_code || update.callback_query?.from?.language_code
     const ai = await createAI(c, userId)
 
-    // Create i18n instance for the user
-    const i18n = await createI18nForUser(db, userId)
+    // Create i18n instance for the user with auto-detection
+    const i18n = await createI18nForUser(db, userId, telegramLanguageCode)
 
     try {
         // Handle callback queries (button clicks)

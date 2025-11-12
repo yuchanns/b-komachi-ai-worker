@@ -109,6 +109,37 @@ export class I18n {
 }
 
 /**
+ * Map Telegram language code to our locale
+ * Telegram uses IETF language tags like "en", "zh-hans", "zh-hant", "ja", etc.
+ */
+export function detectLocaleFromTelegram(languageCode: string | undefined): Locale | null {
+    if (!languageCode) {
+        return null
+    }
+
+    // Normalize to lowercase for comparison
+    const code = languageCode.toLowerCase()
+
+    // Direct matches
+    if (code === "en") {
+        return "en"
+    }
+
+    // Chinese variants
+    if (code === "zh" || code === "zh-hans" || code === "zh-cn") {
+        return "zh-CN"
+    }
+
+    // For other Chinese variants (zh-hant, zh-tw, zh-hk), also map to zh-CN
+    if (code.startsWith("zh")) {
+        return "zh-CN"
+    }
+
+    // Default to null if we don't support the language
+    return null
+}
+
+/**
  * Get user's preferred language from database
  */
 export async function getUserLanguage(db: D1Database, userId: number): Promise<Locale | null> {
@@ -161,18 +192,43 @@ export async function setUserLanguage(db: D1Database, userId: number, language: 
 }
 
 /**
- * Create an I18n instance for a user
- * Tries to load user's preferred language from database
- * Falls back to default language if not found or on error
+ * Create an I18n instance for a user with auto-detection support
+ * 1. First checks database for user's saved preference
+ * 2. If no preference, tries to detect from Telegram language_code
+ * 3. If detection succeeds and language is supported, saves it as preference
+ * 4. Falls back to default language if all else fails
  */
-export async function createI18nForUser(db: D1Database | undefined, userId: number | undefined): Promise<I18n> {
+export async function createI18nForUser(
+    db: D1Database | undefined,
+    userId: number | undefined,
+    telegramLanguageCode?: string
+): Promise<I18n> {
     if (!db || !userId) {
         return new I18n(DEFAULT_LOCALE)
     }
 
     try {
+        // First, check if user has a saved preference
         const userLang = await getUserLanguage(db, userId)
-        return new I18n(userLang || DEFAULT_LOCALE)
+        if (userLang) {
+            return new I18n(userLang)
+        }
+
+        // No saved preference, try to auto-detect from Telegram
+        if (telegramLanguageCode) {
+            const detectedLocale = detectLocaleFromTelegram(telegramLanguageCode)
+            if (detectedLocale) {
+                // Save the detected language as user's preference
+                await setUserLanguage(db, userId, detectedLocale)
+                console.log(
+                    `Auto-detected and saved language ${detectedLocale} for user ${userId} from Telegram code ${telegramLanguageCode}`
+                )
+                return new I18n(detectedLocale)
+            }
+        }
+
+        // Fall back to default locale
+        return new I18n(DEFAULT_LOCALE)
     } catch (error) {
         console.error("Error creating i18n for user:", error)
         return new I18n(DEFAULT_LOCALE)
