@@ -15,6 +15,7 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [x] 📝 Daily quizzes based on user-specific vocabulary.
 - [x] 💡 Help command and daily usage tips
 - [x] 🔄 Per-user AI model selection
+- [x] 🌍 Multi-language support (Chinese & English)
 - [ ] 👂 Review mode for listening to speech and selecting the answer.
 - [ ] 🌎 Support for learning multiple languages.
 - [ ] 🤔 Identify unfamiliar words within sentences.
@@ -32,6 +33,33 @@ Get a quick overview of available commands and features:
 ```
 
 **Daily Tips**: The bot will automatically show usage tips on your first interaction each day to help you get the most out of its features.
+
+### Switch Language
+
+Change the bot interface language between Chinese and English:
+
+```
+/lang
+```
+
+This will show you:
+
+- Your current language
+- All available languages
+- How to switch to a different language
+
+To switch to a specific language:
+
+```
+/lang <code>
+```
+
+For example:
+
+- `/lang zh-CN` - Switch to Chinese (中文)
+- `/lang en` - Switch to English
+
+**Note**: The bot remembers your language preference for future interactions. Default language is Chinese.
 
 ### Switch AI Model
 
@@ -143,17 +171,24 @@ Before deploying, create a D1 database for vocabulary storage:
 
     **For existing users upgrading from older versions:**
 
-    If you already have a database from a previous version, run the migration to add new tables:
+    If you already have a database from a previous version, run the migrations to add new tables/columns:
 
     ```bash
+    # Migration 001: Add user_interactions and user_preferences tables
     wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/001_add_user_interactions_and_preferences.sql
+    
+    # Migration 002: Add language column to user_preferences table
+    wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/002_add_language_preference.sql
     ```
 
-    This migration adds:
+    Migration 001 adds:
     - `user_interactions` table for daily tips feature
     - `user_preferences` table for per-user AI model selection
 
-    **Note**: Both commands are safe to run multiple times. They use `IF NOT EXISTS` to avoid errors on re-execution.
+    Migration 002 adds:
+    - `language` column to `user_preferences` table for i18n support
+
+    **Note**: All migrations are safe to run multiple times. They use `IF NOT EXISTS` or `ALTER TABLE ADD COLUMN` which will fail gracefully if the schema already exists.
 
 Subsequently, deploy the worker by triggering Github Actions.
 
@@ -175,3 +210,41 @@ Simple run below command to specify unit test:
 ```bash
 pnpm test -- -t '<describe> <test>'
 ```
+
+### 🌍 i18n (Internationalization)
+
+The bot supports multiple languages with a flexible i18n system inspired by the [deepfuture](https://github.com/cloudwu/deepfuture) project.
+
+**Supported Languages:**
+- Chinese (Simplified) - `zh-CN` (Default)
+- English - `en`
+
+**Architecture:**
+- Locale files are stored in `locales/` directory as JSON files
+- The i18n module (`src/lib/i18n.ts`) provides translation functions
+- User language preferences are stored in the database
+- Each user can choose their preferred language using `/lang <code>`
+
+**Adding a New Language:**
+
+1. Create a new locale file in `locales/` (e.g., `locales/ja.json` for Japanese)
+2. Copy the structure from `locales/en.json` and translate all strings
+3. Update `src/lib/i18n.ts` to include the new locale:
+   ```typescript
+   import ja from "../../locales/ja.json"
+   
+   const locales: Record<Locale, LocaleData> = {
+       "zh-CN": zhCN,
+       "en": en,
+       "ja": ja,  // Add new locale
+   }
+   ```
+4. Update the `Locale` type to include the new language code
+5. Update the help messages to include the new language option
+
+**Translation Keys:**
+- Use dot notation for nested keys (e.g., `i18n.t("help.title")`)
+- Support placeholder interpolation with `{key}` format (e.g., `i18n.t("model.switched", { backend: "gemini" })`)
+- Arrays in locale files are automatically joined with newlines
+
+**Note**: AI prompts in `prompts.ts` are intentionally kept in their original language to maintain the quality of AI responses. They are designed to work with AI models that understand both English and Chinese.
