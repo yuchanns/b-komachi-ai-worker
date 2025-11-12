@@ -3,7 +3,7 @@ import { WEBHOOK, HOOK_PREFIX } from "../constants"
 import { Bindings } from "../bindings"
 import { createBot, createAI, createTTS } from "../services"
 import { authorize } from "../middleware"
-import { translate } from "../lib"
+import { translate, HELP_MESSAGE, isFirstInteractionToday, recordUserInteraction, getTipsMessage } from "../lib"
 import { Update } from "../services/telegram"
 
 const hook = new Hono<{ Bindings: Bindings }>()
@@ -54,7 +54,20 @@ hook.post(WEBHOOK, async (c) => {
 
         // Handle regular messages
         const me = await bot.getMe()
-        if (update.message?.text?.startsWith("/quiz")) {
+
+        if (update.message?.text?.startsWith("/help")) {
+            // Handle /help command
+            const { chat, from } = update.message
+            await bot.sendMessage({
+                chat_id: chat.id,
+                text: HELP_MESSAGE,
+                parse_mode: "Markdown",
+            })
+            // Record interaction for /help command
+            if (from) {
+                await recordUserInteraction(db, from.id)
+            }
+        } else if (update.message?.text?.startsWith("/quiz")) {
             // Handle /quiz command
             const { from, chat } = update.message
             if (from) {
@@ -111,6 +124,19 @@ hook.post(WEBHOOK, async (c) => {
             update.message?.entities?.some((val) => val.type == "mention") &&
             update.message.text?.includes(`@${me.result.username}`)
         ) {
+            // Check if this is user's first interaction today
+            if (update.message.from) {
+                const isFirstToday = await isFirstInteractionToday(db, update.message.from.id)
+                if (isFirstToday) {
+                    await recordUserInteraction(db, update.message.from.id)
+                    // Send tips message before handling the query
+                    await bot.sendMessage({
+                        chat_id: update.message.chat.id,
+                        text: getTipsMessage(),
+                        parse_mode: "Markdown",
+                    })
+                }
+            }
             // Handle mention (vocabulary query)
             await translate(update.message, { bot, ai, tts }, db)
         }
