@@ -5,7 +5,7 @@ import { createBot, createAI, createTTS } from "../services"
 import { authorize } from "../middleware"
 import {
     translate,
-    HELP_MESSAGE,
+    getHelpMessage,
     handleDailyTips,
     getUserAIBackend,
     setUserAIBackend,
@@ -13,6 +13,9 @@ import {
     formatModelMenu,
     AI_BACKENDS,
     AIBackend,
+    createI18nForUser,
+    I18n,
+    setUserLanguage,
 } from "../lib"
 import { Update } from "../services/telegram"
 
@@ -50,9 +53,13 @@ hook.post(WEBHOOK, async (c) => {
         return new Response("Database not configured", { status: 500 })
     }
 
-    // Get user ID for AI backend selection
+    // Get user ID and language code for AI backend and language selection
     const userId = update.message?.from?.id || update.callback_query?.from?.id
+    const telegramLanguageCode = update.message?.from?.language_code || update.callback_query?.from?.language_code
     const ai = await createAI(c, userId)
+
+    // Create i18n instance for the user with auto-detection
+    const i18n = await createI18nForUser(db, userId, telegramLanguageCode)
 
     try {
         // Handle callback queries (button clicks)
@@ -73,9 +80,47 @@ hook.post(WEBHOOK, async (c) => {
             const { chat } = update.message
             await bot.sendMessage({
                 chat_id: chat.id,
-                text: HELP_MESSAGE,
+                text: getHelpMessage(i18n),
                 parse_mode: "Markdown",
             })
+        } else if (update.message?.text?.startsWith("/lang")) {
+            // Handle /lang command
+            const { chat, from, text } = update.message
+            if (!from) {
+                return new Response("Ok")
+            }
+
+            const args = text?.split(/\s+/)
+            const langCode = args?.[1]
+
+            if (!langCode) {
+                // Show current language and available languages
+                const message = i18n.t("language.current") + i18n.t("language.available") + i18n.t("language.switch_hint")
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: message,
+                    parse_mode: "Markdown",
+                })
+            } else if (I18n.isValidLocale(langCode)) {
+                // Set user's preferred language (normalize the code)
+                const locale = I18n.normalizeLocale(langCode)!
+                await setUserLanguage(db, from.id, locale)
+
+                // Switch i18n instance to new language for confirmation message
+                i18n.switch(locale)
+
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: i18n.t("language.switched"),
+                    parse_mode: "Markdown",
+                })
+            } else {
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: i18n.t("language.invalid", { code: langCode }),
+                    parse_mode: "Markdown",
+                })
+            }
         } else if (update.message?.text?.startsWith("/model")) {
             // Handle /model command
             const { chat, from, text } = update.message
@@ -89,7 +134,7 @@ hook.post(WEBHOOK, async (c) => {
             if (!command) {
                 // Show current model and available models
                 const currentBackend = await getUserAIBackend(db, from.id)
-                const menu = formatModelMenu(c.env, currentBackend)
+                const menu = formatModelMenu(c.env, currentBackend, i18n)
                 await bot.sendMessage({
                     chat_id: chat.id,
                     text: menu,
@@ -103,23 +148,23 @@ hook.post(WEBHOOK, async (c) => {
                 if (!available.includes(backend)) {
                     await bot.sendMessage({
                         chat_id: chat.id,
-                        text: `❌ 模型 *${backend}* 未配置或不可用\n\n请使用 \`/model\` 查看可用模型`,
+                        text: i18n.t("model.not_configured", { backend }),
                         parse_mode: "Markdown",
                     })
                     return new Response("Ok")
                 }
 
                 await setUserAIBackend(db, from.id, backend)
-                const menu = formatModelMenu(c.env, backend)
                 await bot.sendMessage({
                     chat_id: chat.id,
-                    text: `✅ 已切换到 *${backend}*\n\n${menu}`,
+                    text: i18n.t("model.switched", { backend }),
                     parse_mode: "Markdown",
                 })
             } else {
+                const available = getAvailableBackends(c.env).join(", ")
                 await bot.sendMessage({
                     chat_id: chat.id,
-                    text: `❌ 未知的模型：${command}\n\n请使用 \`/model\` 查看可用模型`,
+                    text: i18n.t("model.invalid", { backend: command, available }),
                     parse_mode: "Markdown",
                 })
             }
@@ -135,7 +180,7 @@ hook.post(WEBHOOK, async (c) => {
                 if (allWords.length === 0) {
                     await bot.sendMessage({
                         chat_id: chat.id,
-                        text: "你还没有词汇记录。先向我询问一些单词吧！",
+                        text: i18n.t("quiz.not_enough_words", { min: 1, current: 0 }),
                     })
                     return new Response("Ok")
                 }
@@ -143,7 +188,7 @@ hook.post(WEBHOOK, async (c) => {
                 if (allWords.length < 5) {
                     await bot.sendMessage({
                         chat_id: chat.id,
-                        text: `你当前有 ${allWords.length} 个词汇，至少需要 5 个单词才能开始测验。继续学习更多单词吧！`,
+                        text: i18n.t("quiz.not_enough_words", { min: 5, current: allWords.length }),
                     })
                     return new Response("Ok")
                 }
@@ -153,15 +198,15 @@ hook.post(WEBHOOK, async (c) => {
 
                 await bot.sendMessage({
                     chat_id: chat.id,
-                    text: `📚 正在从你的 ${allWords.length} 个词汇中生成测验...\n💡 本次测验将优先复习需要加强的单词`,
+                    text: i18n.t("quiz.generating"),
                 })
 
-                const questions = await generateQuiz({ bot, ai, tts }, priorityWords)
+                const questions = await generateQuiz({ bot, ai, tts }, priorityWords, i18n)
 
                 if (questions.length === 0) {
                     await bot.sendMessage({
                         chat_id: chat.id,
-                        text: "生成测验失败，请稍后再试。",
+                        text: i18n.t("quiz.generation_error"),
                     })
                     return new Response("Ok")
                 }
@@ -185,19 +230,25 @@ hook.post(WEBHOOK, async (c) => {
         }
 
         // Handle daily tips workflow at the end (unified check for all interactions)
-        await handleDailyTips(update, me.result.username, db, async (chatId, text, parseMode) => {
-            await bot.sendMessage({
-                chat_id: chatId,
-                text: text,
-                parse_mode: parseMode as "Markdown" | "HTML" | undefined,
-            })
-        })
+        await handleDailyTips(
+            update,
+            me.result.username,
+            db,
+            async (chatId, text, parseMode) => {
+                await bot.sendMessage({
+                    chat_id: chatId,
+                    text: text,
+                    parse_mode: parseMode as "Markdown" | "HTML" | undefined,
+                })
+            },
+            i18n
+        )
     } catch (error) {
         console.error("Error handling update:", error)
         if (update.message) {
             await bot.sendMessage({
                 chat_id: update.message.chat.id,
-                text: `Error: ${error}`,
+                text: i18n.t("error.general", { message: String(error) }),
             })
         }
     }
