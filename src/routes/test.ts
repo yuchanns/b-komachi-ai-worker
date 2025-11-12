@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { Hono } from "hono/tiny"
 import { translate } from "../lib"
 import { Bindings, Injector } from "../bindings"
 import { createBot, createTTS, createAI } from "../services"

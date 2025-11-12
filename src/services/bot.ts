@@ -1,4 +1,4 @@
-import { Context } from "hono"
+import type { Context } from "hono"
 import { createTelegramBotAPI } from "./telegram"
 import { createAzureAPI } from "./openai/azure"
 import { Bindings } from "../bindings"

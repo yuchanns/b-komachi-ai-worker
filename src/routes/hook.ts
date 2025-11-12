@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { Hono } from "hono/tiny"
 import { WEBHOOK, HOOK_PREFIX } from "../constants"
 import { Bindings } from "../bindings"
 import { createBot, createAI, createTTS } from "../services"
