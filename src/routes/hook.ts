@@ -6,6 +6,7 @@ import { authorize } from "../middleware"
 import {
     translate,
     HELP_MESSAGE,
+    getHelpMessage,
     handleDailyTips,
     getUserAIBackend,
     setUserAIBackend,
@@ -13,6 +14,10 @@ import {
     formatModelMenu,
     AI_BACKENDS,
     AIBackend,
+    createI18nForUser,
+    I18n,
+    setUserLanguage,
+    Locale,
 } from "../lib"
 import { Update } from "../services/telegram"
 
@@ -50,9 +55,12 @@ hook.post(WEBHOOK, async (c) => {
         return new Response("Database not configured", { status: 500 })
     }
 
-    // Get user ID for AI backend selection
+    // Get user ID for AI backend and language selection
     const userId = update.message?.from?.id || update.callback_query?.from?.id
     const ai = await createAI(c, userId)
+    
+    // Create i18n instance for the user
+    const i18n = await createI18nForUser(db, userId)
 
     try {
         // Handle callback queries (button clicks)
@@ -73,9 +81,47 @@ hook.post(WEBHOOK, async (c) => {
             const { chat } = update.message
             await bot.sendMessage({
                 chat_id: chat.id,
-                text: HELP_MESSAGE,
+                text: getHelpMessage(i18n),
                 parse_mode: "Markdown",
             })
+        } else if (update.message?.text?.startsWith("/lang")) {
+            // Handle /lang command
+            const { chat, from, text } = update.message
+            if (!from) {
+                return new Response("Ok")
+            }
+
+            const args = text?.split(/\s+/)
+            const langCode = args?.[1]?.toLowerCase()
+
+            if (!langCode) {
+                // Show current language and available languages
+                const message = i18n.t("language.current") + i18n.t("language.available") + i18n.t("language.switch_hint")
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: message,
+                    parse_mode: "Markdown",
+                })
+            } else if (I18n.isValidLocale(langCode)) {
+                // Set user's preferred language
+                const locale = langCode as Locale
+                await setUserLanguage(db, from.id, locale)
+                
+                // Switch i18n instance to new language for confirmation message
+                i18n.switch(locale)
+                
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: i18n.t("language.switched"),
+                    parse_mode: "Markdown",
+                })
+            } else {
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: i18n.t("language.invalid", { code: langCode }),
+                    parse_mode: "Markdown",
+                })
+            }
         } else if (update.message?.text?.startsWith("/model")) {
             // Handle /model command
             const { chat, from, text } = update.message
@@ -191,7 +237,7 @@ hook.post(WEBHOOK, async (c) => {
                 text: text,
                 parse_mode: parseMode as "Markdown" | "HTML" | undefined,
             })
-        })
+        }, i18n)
     } catch (error) {
         console.error("Error handling update:", error)
         if (update.message) {

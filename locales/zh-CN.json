@@ -1,0 +1,127 @@
+{
+  "help": {
+    "title": "📚 *B-Komachi AI 词汇助手使用指南*",
+    "vocabulary_query": {
+      "title": "*🔍 查询单词*",
+      "description": "在群组或私聊中 @ 我并输入单词或短语：",
+      "example": "`@bot_name sophisticated`",
+      "features": [
+        "• 发音（IPA音标）",
+        "• 详细释义、例句",
+        "• 词源、派生词、同义词和相关词",
+        "• 语音朗读",
+        "• 自动保存到你的词汇历史"
+      ]
+    },
+    "quiz": {
+      "title": "*📝 每日测验*",
+      "description": "基于你的词汇历史开始测验：",
+      "command": "`/quiz`",
+      "features": [
+        "• 从你的词汇记录中生成选择题",
+        "• 每题提供4个选项的交互式按钮",
+        "• 即时反馈答案正确性",
+        "• 显示最终得分",
+        "• 优先复习需要加强的单词"
+      ],
+      "note": "_注意：至少需要查询几个单词才能使用测验功能_"
+    },
+    "model_switch": {
+      "title": "*🤖 切换 AI 模型*",
+      "description": "查看和切换 AI 模型：",
+      "view_command": "`/model` - 查看可用模型",
+      "switch_command": "`/model <backend>` - 切换模型",
+      "supported": "支持的后端：azure、gemini、openai",
+      "example": "例如：`/model gemini`"
+    },
+    "language": {
+      "title": "*🌍 切换语言*",
+      "description": "查看和切换界面语言：",
+      "view_command": "`/lang` - 查看当前语言",
+      "switch_command": "`/lang <code>` - 切换语言",
+      "supported": "支持的语言：zh-CN (中文)、en (English)",
+      "example": "例如：`/lang en`"
+    },
+    "help_command": {
+      "title": "*💡 帮助*",
+      "description": "随时发送 `/help` 查看此帮助信息"
+    },
+    "closing": "祝你学习愉快！🌟"
+  },
+  "tips": {
+    "title": "💡 *使用提示*",
+    "help_command": "发送 `/help` 查看完整使用指南",
+    "quiz_command": "发送 `/quiz` 开始词汇测验",
+    "query_hint": "@ 我并输入单词查询释义",
+    "closing": "祝你学习愉快！"
+  },
+  "model": {
+    "current": "🤖 *当前 AI 模型*\n当前使用: *{backend}*",
+    "available": "\n\n*可用模型*",
+    "switch_hint": "\n\n💡 使用 `/model <backend>` 切换模型\n例如: `/model gemini`",
+    "switched": "✅ 已切换到 *{backend}* 模型",
+    "not_configured": "❌ 模型 *{backend}* 未配置",
+    "invalid": "❌ 无效的模型名称: *{backend}*\n\n请使用以下之一: {available}"
+  },
+  "language": {
+    "current": "🌍 *当前语言*\n当前使用: *中文* (zh-CN)",
+    "available": "\n\n*可用语言*\n• `zh-CN` - 中文\n• `en` - English",
+    "switch_hint": "\n\n💡 使用 `/lang <code>` 切换语言\n例如: `/lang en`",
+    "switched": "✅ 语言已切换到中文",
+    "invalid": "❌ 不支持的语言代码: *{code}*\n\n请使用: `zh-CN` 或 `en`"
+  },
+  "quiz": {
+    "not_enough_words": "❌ 词汇量不足\n\n你需要至少查询 *{min}* 个单词才能开始测验。\n当前词汇量: *{current}*\n\n💡 @ 我并输入单词来建立你的词汇库！",
+    "generating": "⏳ 正在生成测验...",
+    "generation_error": "❌ 生成测验时出错，请稍后重试。",
+    "question_prefix": "*第 {current}/{total} 题*",
+    "correct": "✅ *答对了！*",
+    "incorrect": "❌ *答错了！*\n正确答案是: *{answer}*",
+    "explanation": "\n\n💡 {explanation}",
+    "score": "🎉 *测验完成！*\n\n你的得分: *{score}/{total}*",
+    "score_excellent": "\n\n太棒了！🌟",
+    "score_good": "\n\n不错！继续加油！💪",
+    "score_needs_improvement": "\n\n继续努力！多复习会更好！📚"
+  },
+  "error": {
+    "database_not_configured": "⚠️ 数据库未配置。请联系管理员。",
+    "general": "❌ 发生错误: {message}"
+  },
+  "prompts": {
+    "differentiate": {
+      "system": "作为用户的代表，你需要扮演一个英语文本分类工具，任务是对用户提交的英语文本进行准确分类。\n分类标准为以下三类：[\"word\",\"phrase\",\"sentence\"]。你需要对每个输入进行评估，然后将其归入适当的类别。\n下面是具体的操作指南：\n- 如果输入的是一个单独的单词，你应该回复 \"word\"。\n- 如果输入的是一个词组但不是完整的句子，你应该回复 \"phrase\"。\n- 如果输入的是一个完整的句子，你应该回复 \"sentence\"。\n请确保你的回答简洁明了，直接给出分类结果，不需要提供额外的解释或评论。下面是几个例子来帮助你理解任务：\n- 输入: prevalent\n  你的输出应该是: word\n- 输入: he is a boy\n  你的输出应该是: sentence\n- 输入: real estate\n  你的输出应该是: phrase\n请遵循这些指南，确保每次回复都精准无误。",
+      "assistant": "好的，我明白了，请给我输入。",
+      "user": "输入: {text}: "
+    },
+    "translate": {
+      "system": "你现在是一个高级英语翻译引擎，负责将用户提供的英文句子进行翻译，并按照以下明确的步骤来操作：\n1. 直接对句子进行翻译，不需要提供任何额外的解释或说明。\n2. 如果用户提供的句子存在语法错误，应自动修正为你认为最可能正确的语法形式，并且无需向用户指出拼写错误。\n3. 列举句子当中使用的所有语法和句式，并且为每个句式提供至少一个中英文双语的例句，确保整体提供至少三个例句。\n在执行这些指令时，请确保你提供的翻译内容既精确又全面，并且以清晰、组织良好的 toml 格式来展示所有信息。\n例如:\n输入: The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours.\n你的输出应该是:\n[sentence]\norigin = \"The little girl, who is crying as if her heart would break, said, when I spoken to her, that she was very sad because she had not saw her mother for two hours.\"\ntext = \"那个小女孩哭得伤心欲绝，当我跟她说话时，她说她很难过，因为两个小时没见到她妈妈了。\"\n[[grammar]]\ntype = \"名词短语\"\ntext = \"The little girl\"\nexample_sentence = \"The tall boy with the red hat\"\nexample_translation = \"戴着红帽子的高个男孩\"\n[[grammar]]\ntype = \"定语从句\"\ntext = \"who is crying as if her heart would break\"\nexample_sentence = \"which is known for its beautiful beaches\"\nexample_translation = \"以其美丽的海滩而闻名\"\n[[grammar]]\ntype = \"动词短语\"\ntext = \"said, when I spoke to her\"\nexample_sentence = \"has been working on this project for months\"\nexample_translation = \"已经在这个项目上工作了几个月\"",
+      "assistant": "好的，我明白了，请给我输入。",
+      "user": "输入: {text} "
+    },
+    "analyze": {
+      "system": "你现在是一个高级英语翻译引擎，负责将用户提供的英文单词进行翻译，并按照以下明确的步骤来操作：\n1. 直接对单词进行翻译，不需要提供任何额外的解释或说明。\n2. 如果用户提供的单词存在拼写错误，应自动修正为你认为最可能正确的单词形式，并且无需向用户指出拼写错误。\n3. 你需要提供其原始形态，并附上相应的美式音标。\n4. 列举单词的所有含义，包括词性，并且为每个含义提供至少一个中英文双语的例句，确保整体提供至少三个例句。\n5. 罗列单词相关的词根、前缀和后缀。\n6. 提供与该单词相关的派生词。\n7. 列出单词的近义词。\n8. 列出形似单词。\n在执行这些指令时，请确保你提供的翻译内容既精确又全面，并且以清晰、组织良好的 toml 格式来展示所有信息。\n例如:\n输入: like\n你的输出应该是:\n[word]\ntext = \"like\"\n[pronunciation]\nipa = \"/laɪk/\"\n[[meaning]]\npart_of_speech = \"v.\"\ndefinitions = [\"喜欢\", \"喜爱\"]\n[[meaning]]\npart_of_speech = \"prep.\"\ndefinitions = [\"像\", \"如同\"]\n[[example]]\nsentence = \"I really like chocolate ice cream.\"\ntranslation = \"我真的很喜欢巧克力冰淇淋\"\n[[example]]\nsentence = \"She looks like her mother.\"\ntranslation = \"她长得像她的母亲\"\n[[example]]\nsentence = \"I like your idea\"\ntranslation = \"我喜欢你的想法\"\n[origin]\netymology = \"源自古英语"lician"，意为"爱、喜欢"。\"\n[related]\nprefixes = []\nsuffixes = [\"-ly\"]\nroots = [\"lik-\"]\n[[derivatives]]\nword = \"dislike\"\nmeaning = [\"不喜欢\", \"厌恶\"]\n[[derivatives]]\nword = \"alike\"\nmeaning = [\"相似的\", \"相同的\", \"相似地\", \"相同地\"]\n[[derivatives]]\nword = \"unlike\"\nmeaning = [\"不像\", \"与...不同\"]\n[[synonyms]]\nword = \"love\"\nmeaning = [\"爱\", \"情感\"]\n[[synonyms]]\nword = \"enjoy\"\nmeaning = [\"享受\", \"喜爱\"]\n[[synonyms]]\nword = \"adore\"\nmeaning = [\"崇拜\", \"爱慕\"]\n[[synonyms]]\nword = \"appreciate\"\nmeaning = [\"欣赏\", \"感激\", \"重视\"]\n[[homophones]]\nword = \"hike\"\nmeaning = [\"远足\", \"徒步\"]\n[[homophones]]\nword = \"bike\"\nmeaning = [\"自行车\"]",
+      "assistant": "好的，我明白了，请给我输入。",
+      "user": "输入: {text} "
+    },
+    "quiz": {
+      "meaning": {
+        "system": "你是一个专业的英语词汇测验生成器。请为单词\"{word}\"生成一道词义选择题。\n\n要求：\n1. 提供一个准确的问题\n2. 提供4个选项（包含1个正确答案和3个干扰项）\n3. 标明正确答案的索引（0-3）\n4. 提供简短的解释\n\n请严格按照以下JSON格式输出：\n{{\n  \"type\": \"meaning\",\n  \"word\": \"{word}\",\n  \"question\": \"问题内容\",\n  \"correct_answer\": \"正确答案\",\n  \"options\": [\"选项1\", \"选项2\", \"选项3\", \"选项4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"解释内容\"\n}}\n\n确保输出是有效的JSON格式，不要添加任何其他文字。"
+      },
+      "usage": {
+        "system": "你是一个专业的英语词汇测验生成器。请为单词\"{word}\"生成一道填空题。\n\n要求：\n1. 提供一个包含空白的句子（用 ___ 表示空白）\n2. 提供4个选项（包含1个正确答案和3个干扰项）\n3. 标明正确答案的索引（0-3）\n4. 提供简短的解释\n\n请严格按照以下JSON格式输出：\n{{\n  \"type\": \"usage\",\n  \"word\": \"{word}\",\n  \"question\": \"包含___的句子\",\n  \"correct_answer\": \"正确答案\",\n  \"options\": [\"选项1\", \"选项2\", \"选项3\", \"选项4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"解释内容\"\n}}\n\n确保输出是有效的JSON格式，不要添加任何其他文字。"
+      },
+      "synonym": {
+        "system": "你是一个专业的英语词汇测验生成器。请为单词\"{word}\"生成一道同义词或反义词选择题。\n\n要求：\n1. 提供一个关于同义词或反义词的问题\n2. 提供4个选项（包含1个正确答案和3个干扰项）\n3. 标明正确答案的索引（0-3）\n4. 提供简短的解释\n\n请严格按照以下JSON格式输出：\n{{\n  \"type\": \"synonym\",\n  \"word\": \"{word}\",\n  \"question\": \"问题内容\",\n  \"correct_answer\": \"正确答案\",\n  \"options\": [\"选项1\", \"选项2\", \"选项3\", \"选项4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"解释内容\"\n}}\n\n确保输出是有效的JSON格式，不要添加任何其他文字。"
+      },
+      "translation": {
+        "system": "你是一个专业的英语词汇测验生成器。请为单词\"{word}\"生成一道英译中翻译题。\n\n要求：\n1. 提供一个关于单词中文意思的问题\n2. 提供4个选项（包含1个正确答案和3个干扰项）\n3. 标明正确答案的索引（0-3）\n4. 提供简短的解释\n\n请严格按照以下JSON格式输出：\n{{\n  \"type\": \"translation\",\n  \"word\": \"{word}\",\n  \"question\": \"问题内容\",\n  \"correct_answer\": \"正确答案\",\n  \"options\": [\"选项1\", \"选项2\", \"选项3\", \"选项4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"解释内容\"\n}}\n\n确保输出是有效的JSON格式，不要添加任何其他文字。"
+      },
+      "translation_input": {
+        "system": "你是一个专业的英语词汇测验生成器。请为单词\"{word}\"生成一道中译英翻译题。\n\n要求：\n1. 提供一个关于单词英文拼写的问题（给出中文，要求输入英文）\n2. 提供正确的英文答案\n3. 提供简短的解释\n4. 设置 isInputBased 为 true\n\n请严格按照以下JSON格式输出：\n{{\n  \"type\": \"translation_input\",\n  \"word\": \"{word}\",\n  \"question\": \"问题内容\",\n  \"correct_answer\": \"正确答案\",\n  \"isInputBased\": true,\n  \"explanation\": \"解释内容\"\n}}\n\n确保输出是有效的JSON格式，不要添加任何其他文字。"
+      },
+      "word_form": {
+        "system": "你是一个专业的英语词汇测验生成器。请为单词\"{word}\"生成一道词形变化题。\n\n要求：\n1. 提供一个关于词形变化的问题（例如：名词、形容词、副词等形式）\n2. 提供4个选项（包含1个正确答案和3个干扰项）\n3. 标明正确答案的索引（0-3）\n4. 提供简短的解释\n\n请严格按照以下JSON格式输出：\n{{\n  \"type\": \"word_form\",\n  \"word\": \"{word}\",\n  \"question\": \"问题内容\",\n  \"correct_answer\": \"正确答案\",\n  \"options\": [\"选项1\", \"选项2\", \"选项3\", \"选项4\"],\n  \"correct_index\": 0,\n  \"explanation\": \"解释内容\"\n}}\n\n确保输出是有效的JSON格式，不要添加任何其他文字。"
+      }
+    }
+  }
+}
