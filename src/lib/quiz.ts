@@ -570,13 +570,32 @@ export const handleQuizTextAnswer = async (inj: Injector, userAnswer: string, ch
 
     // Only handle input-based questions
     if (!question.isInputBased) {
-        return // Ignore text input for multiple choice questions
+        // Ignore text input for multiple choice questions - they should click buttons
+        // But let's be helpful and remind them
+        await bot.sendMessage({
+            chat_id,
+            text: "请点击按钮选择答案，而不是输入文本。",
+        })
+        return
     }
 
-    // Validate answer using AI
-    const validation = await validateTranslation(inj, userAnswer, question.correct_answer, question.type, question.word)
+    let isCorrect = false
+    let validationFeedback = ""
 
-    const isCorrect = validation.isCorrect
+    try {
+        // Validate answer using AI
+        const validation = await validateTranslation(inj, userAnswer, question.correct_answer, question.type, question.word)
+        isCorrect = validation.isCorrect
+        validationFeedback = validation.feedback
+    } catch (error) {
+        console.error("Error validating translation:", error)
+        // Fallback: use simple string comparison
+        const normalizedUser = userAnswer.trim().toLowerCase()
+        const normalizedCorrect = question.correct_answer.trim().toLowerCase()
+        isCorrect = normalizedUser === normalizedCorrect
+        validationFeedback = "验证过程出现错误，使用简单匹配评分"
+    }
+
     quiz.answers[questionIndex] = isCorrect ? 1 : 0
 
     // Update word weight based on answer
@@ -606,7 +625,7 @@ export const handleQuizTextAnswer = async (inj: Injector, userAnswer: string, ch
         `你的答案：${userAnswer}\n` +
         `参考答案：${question.correct_answer}\n\n` +
         `${isCorrect ? "✅ 回答正确！" : "❌ 回答有误，请参考参考答案"}\n\n` +
-        `💬 ${validation.feedback}`
+        `💬 ${validationFeedback}`
 
     // Add explanation if available
     if (question.explanation) {
