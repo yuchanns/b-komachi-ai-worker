@@ -193,22 +193,34 @@ export const generateQuiz = async (inj: Injector, words: string[]): Promise<Quiz
             .replace(/```json\n?/g, "")
             .replace(/```\n?/g, "")
             .trim()
-        const questions: QuizQuestion[] = JSON.parse(cleanContent)
+        let questions: QuizQuestion[] = JSON.parse(cleanContent)
+
+        // Normalize questions - ensure isInputBased is set correctly based on type
+        questions = questions.map((q) => {
+            const isTranslationType = q.type === "translation_input" || q.type === "translation_cn_to_en"
+            return {
+                ...q,
+                isInputBased: isTranslationType ? true : q.isInputBased || false,
+                options: isTranslationType && (!q.options || q.options.length === 0) ? [] : q.options,
+                correct_index: isTranslationType ? -1 : q.correct_index,
+            }
+        })
 
         // Validate and take up to 5 questions
-        return questions
-            .filter(
-                (q) =>
-                    q.type &&
-                    q.word &&
-                    q.question &&
-                    q.correct_answer &&
-                    // For input-based questions (translation), options can be empty
-                    (q.isInputBased
-                        ? q.options !== undefined && q.correct_index === -1
-                        : q.options && q.options.length === 4 && q.correct_index >= 0 && q.correct_index < 4)
-            )
-            .slice(0, 5)
+        const validQuestions = questions.filter((q) => {
+            if (!q.type || !q.word || !q.question || !q.correct_answer) {
+                return false
+            }
+            // For input-based questions (translation), options can be empty
+            if (q.isInputBased) {
+                return q.options !== undefined && q.correct_index === -1
+            } else {
+                return q.options && q.options.length === 4 && q.correct_index >= 0 && q.correct_index < 4
+            }
+        })
+
+        console.log(`Generated ${questions.length} questions, ${validQuestions.length} valid`)
+        return validQuestions.slice(0, 5)
     } catch (error) {
         console.error("Failed to parse quiz questions:", error, content)
         return []
@@ -252,6 +264,12 @@ export const sendQuizQuestion = async (
         })
     } else {
         // Create inline keyboard with answer options for multiple choice
+        // Safety check: ensure options exist and have items
+        if (!question.options || question.options.length === 0) {
+            console.error("Question has no options but is not input-based:", question)
+            throw new Error("Multiple choice question must have options")
+        }
+
         const keyboard: InlineKeyboardMarkup = {
             inline_keyboard: question.options.map((option, index) => [
                 {
