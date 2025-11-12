@@ -105,69 +105,158 @@ export interface QuizQuestion {
     isInputBased?: boolean // true for questions requiring text input
 }
 
-// Generate quiz questions from user vocabulary
-const promptToGenerateQuiz = (words: string[]) => {
-    const wordList = words.join(", ")
-    return [
-        {
-            role: "system",
-            content: `你是一个专业的英语词汇测验生成器。请生成多样化的测验问题，包含以下几种题型：
+// Question type definitions for generating quizzes
+type QuestionType = "meaning" | "fill_blank" | "synonym" | "translation_input" | "translation_cn_to_en" | "word_form"
 
-1. **词义选择** (meaning): 询问单词的中文含义，提供4个选项
-2. **填空题** (fill_blank): 给出带有明确空白标记（___）的句子，选择正确的单词。例如："The ___ is very beautiful." 
-3. **同义词/反义词** (synonym): 选择同义词或反义词，提供4个选项
-4. **英译中翻译** (translation_input): 给出包含单词的英文句子，让用户输入中文翻译（不需要options，isInputBased为true）
-5. **中译英翻译** (translation_cn_to_en): 给出中文句子，让用户输入包含指定单词的英文翻译（不需要options，isInputBased为true）
-6. **词形变化** (word_form): 根据语境选择正确的词形（时态、单复数等），提供4个选项
+// Predefined quiz patterns - code determines the question types
+const QUIZ_PATTERNS: QuestionType[][] = [
+    ["meaning", "fill_blank", "synonym", "translation_input", "translation_cn_to_en"],
+    ["meaning", "translation_input", "fill_blank", "translation_cn_to_en", "synonym"],
+    ["translation_input", "meaning", "synonym", "translation_cn_to_en", "fill_blank"],
+]
 
-每个问题的 JSON 格式：
-
-选择题格式（meaning, fill_blank, synonym, word_form）：
-{
-    "type": "题型类型",
-    "word": "测试的单词（英文）",
-    "question": "问题文本（中文）",
-    "correct_answer": "正确答案",
-    "options": ["选项1", "选项2", "选项3", "选项4"],
-    "correct_index": 0-3,
-    "explanation": "答案解释（可选）",
-    "isInputBased": false
-}
-
-翻译题格式（translation_input, translation_cn_to_en）：
-{
-    "type": "translation_input" 或 "translation_cn_to_en",
-    "word": "测试的单词（英文）",
-    "question": "问题文本（中文）",
-    "correct_answer": "参考答案",
-    "options": [],
-    "correct_index": -1,
-    "explanation": "答案解释（可选）",
-    "isInputBased": true
-}
+// Generate a single quiz question of a specific type
+const promptToGenerateQuestion = (word: string, type: QuestionType) => {
+    const prompts = {
+        meaning: {
+            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道词义选择题。
 
 要求：
-- 题型要多样化，不要全是同一种类型
-- **填空题必须在句子中使用下划线（___）标记空白位置，让用户明确知道填空位置**
-- 翻译题使用isInputBased模式，让用户输入答案而非选择
-- 选择题选项要有迷惑性但明确可辨
-- 问题要清晰、符合实际使用场景
-- 只返回 JSON 数组，不要其他文本`,
-        },
-        {
-            role: "user",
-            content: `为这些英文单词生成 5 道测验题：${wordList}
+- 询问单词的中文含义
+- 提供4个选项（一个正确答案，三个迷惑选项）
+- 迷惑选项要有一定相似性但明确可辨
 
-请生成多样化的题型组合，例如：
-- 1道词义选择题
-- 1道填空题（必须包含 ___ 标记）
-- 1道同义词题
-- 1道英译中翻译题（isInputBased: true）
-- 1道中译英翻译题（isInputBased: true）
+返回 JSON 格式：
+{
+    "type": "meaning",
+    "word": "${word}",
+    "question": "问题文本",
+    "correct_answer": "正确的中文含义",
+    "options": ["正确答案", "选项2", "选项3", "选项4"],
+    "correct_index": 0,
+    "explanation": "可选的解释"
+}
 
-确保题目难度适中，适合英语学习者。
-只返回 JSON 数组，不要 markdown 格式。`,
+只返回 JSON，不要 markdown 格式。`,
+            user: `为单词 "${word}" 生成词义选择题。`,
         },
+        fill_blank: {
+            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道填空题。
+
+要求：
+- 给出一个包含 ___ 标记的英文句子
+- ___ 的位置应该填入单词"${word}"
+- 提供4个选项（包括正确答案和3个语法上可能但语义不对的选项）
+
+返回 JSON 格式：
+{
+    "type": "fill_blank",
+    "word": "${word}",
+    "question": "句子，例如：The ___ is very important. 应该填入哪个单词？",
+    "correct_answer": "${word}",
+    "options": ["${word}", "选项2", "选项3", "选项4"],
+    "correct_index": 0,
+    "explanation": "可选的解释"
+}
+
+只返回 JSON，不要 markdown 格式。`,
+            user: `为单词 "${word}" 生成填空题，必须在句子中使用 ___ 标记。`,
+        },
+        synonym: {
+            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道同义词或反义词选择题。
+
+要求：
+- 询问单词的同义词或反义词
+- 提供4个选项
+
+返回 JSON 格式：
+{
+    "type": "synonym",
+    "word": "${word}",
+    "question": "问题文本",
+    "correct_answer": "正确答案",
+    "options": ["正确答案", "选项2", "选项3", "选项4"],
+    "correct_index": 0,
+    "explanation": "可选的解释"
+}
+
+只返回 JSON，不要 markdown 格式。`,
+            user: `为单词 "${word}" 生成同义词或反义词选择题。`,
+        },
+        translation_input: {
+            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道英译中翻译题。
+
+要求：
+- 给出一个包含单词"${word}"的英文句子
+- 让用户输入中文翻译
+- 这是输入题，不需要选项
+
+返回 JSON 格式：
+{
+    "type": "translation_input",
+    "word": "${word}",
+    "question": "请将以下英文翻译成中文：\\n\\"英文句子\\"",
+    "correct_answer": "参考中文翻译",
+    "options": [],
+    "correct_index": -1,
+    "isInputBased": true,
+    "explanation": "可选的解释"
+}
+
+只返回 JSON，不要 markdown 格式。`,
+            user: `为单词 "${word}" 生成英译中翻译题。`,
+        },
+        translation_cn_to_en: {
+            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道中译英翻译题。
+
+要求：
+- 给出一个中文句子
+- 要求用户使用单词"${word}"翻译成英文
+- 这是输入题，不需要选项
+
+返回 JSON 格式：
+{
+    "type": "translation_cn_to_en",
+    "word": "${word}",
+    "question": "请使用单词 \\"${word}\\" 将以下中文翻译成英文：\\n\\"中文句子\\"",
+    "correct_answer": "参考英文翻译",
+    "options": [],
+    "correct_index": -1,
+    "isInputBased": true,
+    "explanation": "可选的解释"
+}
+
+只返回 JSON，不要 markdown 格式。`,
+            user: `为单词 "${word}" 生成中译英翻译题。`,
+        },
+        word_form: {
+            system: `你是一个专业的英语词汇测验生成器。请为单词"${word}"生成一道词形变化题。
+
+要求：
+- 给出一个语境
+- 让用户选择正确的词形（时态、单复数等）
+- 提供4个选项
+
+返回 JSON 格式：
+{
+    "type": "word_form",
+    "word": "${word}",
+    "question": "问题文本",
+    "correct_answer": "正确的词形",
+    "options": ["正确答案", "选项2", "选项3", "选项4"],
+    "correct_index": 0,
+    "explanation": "可选的解释"
+}
+
+只返回 JSON，不要 markdown 格式。`,
+            user: `为单词 "${word}" 生成词形变化题。`,
+        },
+    }
+
+    const prompt = prompts[type]
+    return [
+        { role: "system", content: prompt.system },
+        { role: "user", content: prompt.user },
     ]
 }
 
@@ -179,52 +268,64 @@ export const generateQuiz = async (inj: Injector, words: string[]): Promise<Quiz
     // Select random words (up to 10) for quiz
     const selectedWords = words.sort(() => Math.random() - 0.5).slice(0, Math.min(10, words.length))
 
-    const params = {
-        messages: promptToGenerateQuiz(selectedWords),
-        temperature: 0.7,
-    }
+    // Select a quiz pattern randomly - code determines question types
+    const pattern = QUIZ_PATTERNS[Math.floor(Math.random() * QUIZ_PATTERNS.length)]
 
-    const response = await inj.ai.chat(params)
-    const content = response?.choices[0]?.message.content || "[]"
+    // Generate questions one by one with predetermined types
+    const questions: QuizQuestion[] = []
+    for (let i = 0; i < Math.min(5, selectedWords.length); i++) {
+        const word = selectedWords[i]
+        const type = pattern[i]
 
-    try {
-        // Clean up potential markdown formatting
-        const cleanContent = content
-            .replace(/```json\n?/g, "")
-            .replace(/```\n?/g, "")
-            .trim()
-        let questions: QuizQuestion[] = JSON.parse(cleanContent)
-
-        // Normalize questions - ensure isInputBased is set correctly based on type
-        questions = questions.map((q) => {
-            const isTranslationType = q.type === "translation_input" || q.type === "translation_cn_to_en"
-            return {
-                ...q,
-                isInputBased: isTranslationType ? true : q.isInputBased || false,
-                options: isTranslationType && (!q.options || q.options.length === 0) ? [] : q.options,
-                correct_index: isTranslationType ? -1 : q.correct_index,
+        try {
+            const params = {
+                messages: promptToGenerateQuestion(word, type),
+                temperature: 0.7,
             }
-        })
 
-        // Validate and take up to 5 questions
-        const validQuestions = questions.filter((q) => {
-            if (!q.type || !q.word || !q.question || !q.correct_answer) {
-                return false
+            const response = await inj.ai.chat(params)
+            const content = response?.choices[0]?.message.content || "{}"
+
+            // Clean up potential markdown formatting
+            const cleanContent = content
+                .replace(/```json\n?/g, "")
+                .replace(/```\n?/g, "")
+                .trim()
+
+            let question: QuizQuestion = JSON.parse(cleanContent)
+
+            // Normalize question - ensure fields are correct based on type
+            const isTranslationType = type === "translation_input" || type === "translation_cn_to_en"
+            question = {
+                ...question,
+                type: type, // Force the type we requested
+                isInputBased: isTranslationType,
+                options: isTranslationType ? [] : question.options || [],
+                correct_index: isTranslationType ? -1 : question.correct_index,
             }
-            // For input-based questions (translation), options can be empty
-            if (q.isInputBased) {
-                return q.options !== undefined && q.correct_index === -1
+
+            // Validate question
+            if (question.word && question.question && question.correct_answer) {
+                if (question.isInputBased) {
+                    // Input-based question is valid
+                    questions.push(question)
+                } else if (question.options && question.options.length === 4 && question.correct_index >= 0 && question.correct_index < 4) {
+                    // Multiple choice question is valid
+                    questions.push(question)
+                } else {
+                    console.error(`Invalid question generated for word "${word}", type "${type}":`, question)
+                }
             } else {
-                return q.options && q.options.length === 4 && q.correct_index >= 0 && q.correct_index < 4
+                console.error(`Incomplete question generated for word "${word}", type "${type}":`, question)
             }
-        })
-
-        console.log(`Generated ${questions.length} questions, ${validQuestions.length} valid`)
-        return validQuestions.slice(0, 5)
-    } catch (error) {
-        console.error("Failed to parse quiz questions:", error, content)
-        return []
+        } catch (error) {
+            console.error(`Failed to generate question for word "${word}", type "${type}":`, error)
+            // Continue to next question even if this one fails
+        }
     }
+
+    console.log(`Generated ${questions.length} valid questions out of ${Math.min(5, selectedWords.length)} attempted`)
+    return questions
 }
 
 // Send a quiz question with inline keyboard
@@ -252,22 +353,28 @@ export const sendQuizQuestion = async (
 
     // For input-based questions (translation), use ForceReply to collect text input
     if (question.isInputBased) {
-        await bot.sendMessage({
-            chat_id,
-            text: questionText + `请直接输入你的答案：`,
-            parse_mode: "Markdown",
-            reply_markup: {
-                force_reply: true,
-                input_field_placeholder: "输入你的翻译...",
-                selective: true,
-            },
-        })
+        try {
+            await bot.sendMessage({
+                chat_id,
+                text: questionText + `请直接输入你的答案：`,
+                parse_mode: "Markdown",
+                reply_markup: {
+                    force_reply: true,
+                    input_field_placeholder: "输入你的翻译...",
+                    selective: true,
+                },
+            })
+        } catch (error) {
+            console.error(`Failed to send input-based question to chat ${chat_id}:`, error)
+            throw error // Re-throw so caller can handle
+        }
     } else {
         // Create inline keyboard with answer options for multiple choice
         // Safety check: ensure options exist and have items
         if (!question.options || question.options.length === 0) {
-            console.error("Question has no options but is not input-based:", question)
-            throw new Error("Multiple choice question must have options")
+            const errorMsg = `Question type "${question.type}" for word "${question.word}" has no options`
+            console.error(errorMsg, question)
+            throw new Error(errorMsg)
         }
 
         const keyboard: InlineKeyboardMarkup = {
@@ -279,12 +386,17 @@ export const sendQuizQuestion = async (
             ]),
         }
 
-        await bot.sendMessage({
-            chat_id,
-            text: questionText + `请选择正确答案：`,
-            parse_mode: "Markdown",
-            reply_markup: keyboard,
-        })
+        try {
+            await bot.sendMessage({
+                chat_id,
+                text: questionText + `请选择正确答案：`,
+                parse_mode: "Markdown",
+                reply_markup: keyboard,
+            })
+        } catch (error) {
+            console.error(`Failed to send multiple choice question to chat ${chat_id}:`, error)
+            throw error // Re-throw so caller can handle
+        }
     }
 }
 
@@ -543,7 +655,22 @@ export const handleQuizAnswer = async (
         // Send next unanswered question immediately (no setTimeout in Workers)
         const nextIndex = quiz.answers.findIndex((a) => a === -1)
         if (nextIndex !== -1) {
-            await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)
+            try {
+                await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)
+            } catch (error) {
+                console.error(`Failed to send next question (index ${nextIndex}):`, error)
+                // Try to notify user about the error
+                try {
+                    await bot.sendMessage({
+                        chat_id,
+                        text: `⚠️ 发送下一题时出错，测验已中止。请重新开始。\n错误: ${error instanceof Error ? error.message : String(error)}`,
+                    })
+                } catch (notifyError) {
+                    console.error("Failed to notify user about error:", notifyError)
+                }
+                // Clean up quiz state since we can't continue
+                await drizzle.delete(quizState).where(eq(quizState.userId, userId))
+            }
         }
     }
 }
@@ -674,7 +801,22 @@ export const handleQuizTextAnswer = async (inj: Injector, userAnswer: string, ch
         // Send next unanswered question immediately
         const nextIndex = quiz.answers.findIndex((a) => a === -1)
         if (nextIndex !== -1) {
-            await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)
+            try {
+                await sendQuizQuestion(inj, chat_id, quiz.questions[nextIndex], nextIndex, quiz.questions.length)
+            } catch (error) {
+                console.error(`Failed to send next question (index ${nextIndex}):`, error)
+                // Try to notify user about the error
+                try {
+                    await bot.sendMessage({
+                        chat_id,
+                        text: `⚠️ 发送下一题时出错，测验已中止。请重新开始。\n错误: ${error instanceof Error ? error.message : String(error)}`,
+                    })
+                } catch (notifyError) {
+                    console.error("Failed to notify user about error:", notifyError)
+                }
+                // Clean up quiz state since we can't continue
+                await drizzle.delete(quizState).where(eq(quizState.userId, userId))
+            }
         }
     }
 }
