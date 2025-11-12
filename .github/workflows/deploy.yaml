@@ -29,6 +29,7 @@ jobs:
                       ENV_AZURE_TTS_ENDPOINT
                       ENV_AZURE_TTS_KEY
                       ENV_GEMINI_API_KEY
+                      ENV_GEMINI_MODEL
                       ENV_AI_BACKEND
                       ENV_OPENAI_URL
                       ENV_OPENAI_API_KEY
@@ -42,6 +43,7 @@ jobs:
                   ENV_AZURE_TTS_ENDPOINT: ${{ secrets.ENV_AZURE_TTS_ENDPOINT }}
                   ENV_AZURE_TTS_KEY: ${{ secrets.ENV_AZURE_TTS_KEY }}
                   ENV_GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
+                  ENV_GEMINI_MODEL: ${{ secrets.ENV_GEMINI_MODEL }}
                   ENV_AI_BACKEND: ${{ secrets.ENV_AI_BACKEND }}
                   ENV_OPENAI_URL: ${{ secrets.ENV_OPENAI_URL }}
                   ENV_OPENAI_API_KEY: ${{ secrets.ENV_OPENAI_API_KEY }}
