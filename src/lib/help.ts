@@ -2,6 +2,7 @@ import { D1Database } from "@cloudflare/workers-types"
 import { eq, and } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/d1"
 import { userInteractions } from "../db/schema"
+import { Update } from "../services/telegram"
 
 /**
  * Help message content based on README usage section
@@ -94,4 +95,84 @@ export const getTipsMessage = (): string => {
 
 祝你学习愉快！
 `.trim()
+}
+
+/**
+ * Interaction matcher function type
+ */
+export type InteractionMatcher = (update: Update, botUsername: string) => boolean
+
+/**
+ * Registry of all interaction matchers
+ * Each matcher should return true if the update represents that type of interaction
+ */
+const interactionMatchers: InteractionMatcher[] = []
+
+/**
+ * Register a new interaction matcher
+ * This should be called when defining new command handlers
+ */
+export const registerInteraction = (matcher: InteractionMatcher): void => {
+    interactionMatchers.push(matcher)
+}
+
+/**
+ * Check if the update represents any registered user interaction
+ */
+export const isUserInteraction = (update: Update, botUsername: string): boolean => {
+    return interactionMatchers.some((matcher) => matcher(update, botUsername))
+}
+
+/**
+ * Register built-in interaction matchers
+ */
+
+// Command matcher: /help, /quiz, etc.
+registerInteraction((update: Update) => {
+    const text = update.message?.text
+    if (!text) return false
+    return text.startsWith("/help") || text.startsWith("/quiz")
+})
+
+// Vocabulary query matcher: @bot_name word
+registerInteraction((update: Update, botUsername: string) => {
+    return update.message?.entities?.some((val) => val.type == "mention") && !!update.message.text?.includes(`@${botUsername}`)
+})
+
+// Quiz text answer matcher: reply to bot message
+registerInteraction((update: Update) => {
+    return !!(update.message?.reply_to_message && update.message.text && update.message.from)
+})
+
+/**
+ * Handle daily tips workflow at the end of message processing
+ * This should be called after the main interaction is handled
+ */
+export const handleDailyTips = async (
+    update: Update,
+    botUsername: string,
+    db: D1Database,
+    sendMessage: (chatId: number, text: string, parseMode?: string) => Promise<void>
+): Promise<void> => {
+    // Only process regular messages (not callback queries)
+    if (!update.message?.from) {
+        return
+    }
+
+    // Check if this is a valid interaction
+    if (!isUserInteraction(update, botUsername)) {
+        return
+    }
+
+    // Check if this is the user's first interaction today
+    const isFirstToday = await isFirstInteractionToday(db, update.message.from.id)
+    if (!isFirstToday) {
+        return
+    }
+
+    // Record the interaction
+    await recordUserInteraction(db, update.message.from.id)
+
+    // Send tips message
+    await sendMessage(update.message.chat.id, getTipsMessage(), "Markdown")
 }

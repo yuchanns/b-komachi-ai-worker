@@ -13,6 +13,7 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [x] 💻 Stream Output
 - [x] 🤖 Multiple AI support(Azure OpenAI, Gemini Pro...)
 - [x] 📝 Daily quizzes based on user-specific vocabulary.
+- [x] 💡 Help command and daily usage tips
 - [ ] 👂 Review mode for listening to speech and selecting the answer.
 - [ ] 🌎 Support for learning multiple languages.
 - [ ] 🤔 Identify unfamiliar words within sentences.
@@ -20,6 +21,16 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [ ] 🔮 More features coming soon...
 
 ## 📖 Usage
+
+### Help Command
+
+Get a quick overview of available commands and features:
+
+```
+/help
+```
+
+**Daily Tips**: The bot will automatically show usage tips on your first interaction each day to help you get the most out of its features.
 
 ### Vocabulary Lookup
 
