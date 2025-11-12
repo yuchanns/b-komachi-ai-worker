@@ -139,7 +139,7 @@ Before deploying, create a D1 database for vocabulary storage:
     wrangler d1 execute b-komachi-vocabulary --remote --file=schema.sql
     ```
 
-    **Note**: This command is safe to run multiple times. It will create tables if they don't exist, or add missing columns if upgrading from an older version. Some error messages about duplicate columns are expected and can be ignored when migrating.
+    **Note**: This command is safe to run multiple times. It will create tables and indexes if they don't exist. For fresh installations, all tables will be created with the current schema.
 
 Subsequently, deploy the worker by triggering Github Actions.
 

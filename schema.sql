@@ -1,5 +1,5 @@
--- This schema file handles both fresh installation and migration from older versions
--- It's safe to run multiple times - it will only add missing columns/tables/indexes
+-- Database schema for B-Komachi AI Worker
+-- This file is safe to run multiple times - it uses IF NOT EXISTS for all tables and indexes
 
 -- Create vocabulary table if it doesn't exist (for fresh installations)
 CREATE TABLE IF NOT EXISTS vocabulary (
@@ -13,13 +13,6 @@ CREATE TABLE IF NOT EXISTS vocabulary (
     last_reviewed INTEGER,
     UNIQUE(user_id, word COLLATE NOCASE)
 );
-
--- Add missing columns for existing tables (migration from older versions)
--- These will fail silently if columns already exist, which is expected
-ALTER TABLE vocabulary ADD COLUMN weight REAL NOT NULL DEFAULT 1.0;
-ALTER TABLE vocabulary ADD COLUMN correct_count INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE vocabulary ADD COLUMN incorrect_count INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE vocabulary ADD COLUMN last_reviewed INTEGER;
 
 -- Create indexes (IF NOT EXISTS ensures they're only created if missing)
 CREATE INDEX IF NOT EXISTS idx_vocabulary_user_id ON vocabulary(user_id);
