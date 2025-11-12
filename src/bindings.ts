@@ -10,6 +10,7 @@ export type Bindings = {
     ENV_AZURE_TTS_KEY: string
     ENV_CHAT_ID: string
     ENV_GEMINI_API_KEY: string
+    ENV_GEMINI_MODEL: string
     ENV_OPENAI_URL: string
     ENV_OPENAI_API_KEY: string
     ENV_OPENAI_MODEL: string

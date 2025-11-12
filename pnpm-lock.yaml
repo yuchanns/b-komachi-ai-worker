@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@google/generative-ai':
-        specifier: ^0.24.1
-        version: 0.24.1
+      '@xsai-ext/providers':
+        specifier: 0.4.0-beta.8
+        version: 0.4.0-beta.8
       '@xsai/generate-text':
         specifier: ^0.4.0-beta.8
         version: 0.4.0-beta.8
@@ -778,10 +778,6 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@google/generative-ai@0.24.1':
-    resolution: {integrity: sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==}
-    engines: {node: '>=18.0.0'}
-
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -1154,6 +1150,12 @@ packages:
 
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
+
+  '@xsai-ext/providers@0.4.0-beta.8':
+    resolution: {integrity: sha512-TctZTqdN9fNJe11NwJnqk4kWqyVIsSJ/fYKVMTbug/iKbzBlijNrSDr3nqIP/BLTaynecCuqqPgZwh9sJHsQQA==}
+
+  '@xsai-ext/shared-providers@0.4.0-beta.8':
+    resolution: {integrity: sha512-H6YVkvclmR90jhPiDkvdbO9yD0AV1MyIvfGAlux27x+N0ogPxkwHJXTimZ9yuIjcIxxb79V2Re4QFjJszJGq+w==}
 
   '@xsai/generate-text@0.4.0-beta.8':
     resolution: {integrity: sha512-y4LPKVePLWTy2vZvaD6rdjuTtdyC0OATo12l8tFbeBAUZxSoFgcWpiQrx+s+pWEnjMtU/CbgYIrAme8S8RMEEQ==}
@@ -2439,8 +2441,6 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@google/generative-ai@0.24.1': {}
-
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.7':
@@ -2777,6 +2777,15 @@ snapshots:
       '@vitest/pretty-format': 3.2.4
       loupe: 3.2.1
       tinyrainbow: 2.0.0
+
+  '@xsai-ext/providers@0.4.0-beta.8':
+    dependencies:
+      '@xsai-ext/shared-providers': 0.4.0-beta.8
+      '@xsai/shared': 0.4.0-beta.8
+
+  '@xsai-ext/shared-providers@0.4.0-beta.8':
+    dependencies:
+      '@xsai/shared': 0.4.0-beta.8
 
   '@xsai/generate-text@0.4.0-beta.8':
     dependencies:

@@ -13,6 +13,8 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [x] 💻 Stream Output
 - [x] 🤖 Multiple AI support(Azure OpenAI, Gemini Pro...)
 - [x] 📝 Daily quizzes based on user-specific vocabulary.
+- [x] 💡 Help command and daily usage tips
+- [x] 🔄 Per-user AI model selection
 - [ ] 👂 Review mode for listening to speech and selecting the answer.
 - [ ] 🌎 Support for learning multiple languages.
 - [ ] 🤔 Identify unfamiliar words within sentences.
@@ -20,6 +22,44 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [ ] 🔮 More features coming soon...
 
 ## 📖 Usage
+
+### Help Command
+
+Get a quick overview of available commands and features:
+
+```
+/help
+```
+
+**Daily Tips**: The bot will automatically show usage tips on your first interaction each day to help you get the most out of its features.
+
+### Switch AI Model
+
+View available AI models and switch between them:
+
+```
+/model
+```
+
+This will show you:
+
+- Your current AI model
+- All available models based on your configuration
+- How to switch to a different model
+
+To switch to a specific model:
+
+```
+/model <backend>
+```
+
+For example:
+
+- `/model gemini` - Switch to Google Gemini
+- `/model openai` - Switch to OpenAI
+- `/model azure` - Switch to Azure OpenAI
+
+**Note**: You can configure multiple AI backends and let each user choose their preferred one. The bot remembers your choice for future interactions.
 
 ### Vocabulary Lookup
 
@@ -67,10 +107,11 @@ Users must provide the following environment variables within GitHub's Secrets -
 | ENV_AZURE_API_VERSION | Azure OpenAI API Version                                                                         | 2023-09-01-preview                                                |
 | ENV_BOT_SECRET        | Telegram Bot Verification Secret, Random Generate From `A-Z, a-z, 0-9, _ and -`                  |                                                                   |
 | ENV_BOT_TOKEN         | Telegram Bot Token                                                                               |                                                                   |
-| ENV_GEMINI_API_KEY    | Google Gemini Pro API Key                                                                        |                                                                   |
+| ENV_GEMINI_API_KEY    | Google Gemini API Key                                                                            |                                                                   |
+| ENV_GEMINI_MODEL      | Optional Gemini Model                                                                            | gemini-1.5-flash (default), gemini-2.0-flash-exp                  |
 | ENV_OPENAI_API_KEY    | OpenAI API Key                                                                                   |                                                                   |
-| ENV_OPENAI_URL        | Optional                                                                                         | https://api.openai.com                                            |
-| ENV_OPENAI_MODEL      | Optional                                                                                         | gpt-3.5-turbo                                                     |
+| ENV_OPENAI_URL        | Optional OpenAI Base URL                                                                         | https://api.openai.com                                            |
+| ENV_OPENAI_MODEL      | Optional OpenAI Model                                                                            | gpt-3.5-turbo                                                     |
 | ENV_AI_BACKEND        | Specify Which AI Backend To Use                                                                  | Optional: `Azure`, `Gemini`, `OpenAI`                             |
 
 ### D1 Database Setup
@@ -94,11 +135,25 @@ Before deploying, create a D1 database for vocabulary storage:
 
 3. Initialize the database schema:
 
+    **For fresh installations:**
+
     ```bash
     wrangler d1 execute b-komachi-vocabulary --remote --file=schema.sql
     ```
 
-    **Note**: This command is safe to run multiple times. It will create tables if they don't exist, or add missing columns if upgrading from an older version. Some error messages about duplicate columns are expected and can be ignored when migrating.
+    **For existing users upgrading from older versions:**
+
+    If you already have a database from a previous version, run the migration to add new tables:
+
+    ```bash
+    wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/001_add_user_interactions_and_preferences.sql
+    ```
+
+    This migration adds:
+    - `user_interactions` table for daily tips feature
+    - `user_preferences` table for per-user AI model selection
+
+    **Note**: Both commands are safe to run multiple times. They use `IF NOT EXISTS` to avoid errors on re-execution.
 
 Subsequently, deploy the worker by triggering Github Actions.
 

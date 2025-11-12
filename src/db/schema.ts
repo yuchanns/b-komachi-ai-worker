@@ -35,3 +35,30 @@ export const quizState = sqliteTable(
         expiresAtIdx: index("idx_quiz_state_expires_at").on(table.expiresAt),
     })
 )
+
+// User interactions table to track daily first interaction for tips
+export const userInteractions = sqliteTable(
+    "user_interactions",
+    {
+        userId: integer("user_id").notNull(),
+        interactionDate: text("interaction_date").notNull(),
+    },
+    (table) => ({
+        pk: index("pk_user_interactions").on(table.userId, table.interactionDate),
+        userIdIdx: index("idx_user_interactions_user_id").on(table.userId),
+        dateIdx: index("idx_user_interactions_date").on(table.interactionDate),
+    })
+)
+
+// User preferences table to store user-specific settings
+export const userPreferences = sqliteTable(
+    "user_preferences",
+    {
+        userId: integer("user_id").primaryKey(),
+        aiBackend: text("ai_backend"),
+        updatedAt: integer("updated_at").notNull(),
+    },
+    (table) => ({
+        userIdIdx: index("idx_user_preferences_user_id").on(table.userId),
+    })
+)

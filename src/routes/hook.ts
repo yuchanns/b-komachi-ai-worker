@@ -3,7 +3,17 @@ import { WEBHOOK, HOOK_PREFIX } from "../constants"
 import { Bindings } from "../bindings"
 import { createBot, createAI, createTTS } from "../services"
 import { authorize } from "../middleware"
-import { translate } from "../lib"
+import {
+    translate,
+    HELP_MESSAGE,
+    handleDailyTips,
+    getUserAIBackend,
+    setUserAIBackend,
+    getAvailableBackends,
+    formatModelMenu,
+    AI_BACKENDS,
+    AIBackend,
+} from "../lib"
 import { Update } from "../services/telegram"
 
 const hook = new Hono<{ Bindings: Bindings }>()
@@ -25,7 +35,6 @@ hook.get("/unRegisterWebhook", async (c) => {
 hook.post(WEBHOOK, async (c) => {
     const update: Update = await c.req.json()
     const bot = createBot(c)
-    const ai = createAI(c)
     const tts = createTTS(c)
     const db = c.env.DB
 
@@ -41,6 +50,10 @@ hook.post(WEBHOOK, async (c) => {
         return new Response("Database not configured", { status: 500 })
     }
 
+    // Get user ID for AI backend selection
+    const userId = update.message?.from?.id || update.callback_query?.from?.id
+    const ai = await createAI(c, userId)
+
     try {
         // Handle callback queries (button clicks)
         if (update.callback_query) {
@@ -54,7 +67,63 @@ hook.post(WEBHOOK, async (c) => {
 
         // Handle regular messages
         const me = await bot.getMe()
-        if (update.message?.text?.startsWith("/quiz")) {
+
+        if (update.message?.text?.startsWith("/help")) {
+            // Handle /help command
+            const { chat } = update.message
+            await bot.sendMessage({
+                chat_id: chat.id,
+                text: HELP_MESSAGE,
+                parse_mode: "Markdown",
+            })
+        } else if (update.message?.text?.startsWith("/model")) {
+            // Handle /model command
+            const { chat, from, text } = update.message
+            if (!from) {
+                return new Response("Ok")
+            }
+
+            const args = text?.split(/\s+/)
+            const command = args?.[1]?.toLowerCase()
+
+            if (!command) {
+                // Show current model and available models
+                const currentBackend = await getUserAIBackend(db, from.id)
+                const menu = formatModelMenu(c.env, currentBackend)
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: menu,
+                    parse_mode: "Markdown",
+                })
+            } else if (AI_BACKENDS.includes(command as AIBackend)) {
+                // Set user's preferred backend
+                const backend = command as AIBackend
+                const available = getAvailableBackends(c.env)
+
+                if (!available.includes(backend)) {
+                    await bot.sendMessage({
+                        chat_id: chat.id,
+                        text: `❌ 模型 *${backend}* 未配置或不可用\n\n请使用 \`/model\` 查看可用模型`,
+                        parse_mode: "Markdown",
+                    })
+                    return new Response("Ok")
+                }
+
+                await setUserAIBackend(db, from.id, backend)
+                const menu = formatModelMenu(c.env, backend)
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: `✅ 已切换到 *${backend}*\n\n${menu}`,
+                    parse_mode: "Markdown",
+                })
+            } else {
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: `❌ 未知的模型：${command}\n\n请使用 \`/model\` 查看可用模型`,
+                    parse_mode: "Markdown",
+                })
+            }
+        } else if (update.message?.text?.startsWith("/quiz")) {
             // Handle /quiz command
             const { from, chat } = update.message
             if (from) {
@@ -114,6 +183,15 @@ hook.post(WEBHOOK, async (c) => {
             // Handle mention (vocabulary query)
             await translate(update.message, { bot, ai, tts }, db)
         }
+
+        // Handle daily tips workflow at the end (unified check for all interactions)
+        await handleDailyTips(update, me.result.username, db, async (chatId, text, parseMode) => {
+            await bot.sendMessage({
+                chat_id: chatId,
+                text: text,
+                parse_mode: parseMode as "Markdown" | "HTML" | undefined,
+            })
+        })
     } catch (error) {
         console.error("Error handling update:", error)
         if (update.message) {
