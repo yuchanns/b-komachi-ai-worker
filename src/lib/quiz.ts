@@ -351,12 +351,28 @@ export const sendQuizQuestion = async (
     const questionText =
         `${typeEmoji[question.type] || "📝"} *测验题目 ${questionIndex + 1}/${totalQuestions}*\n\n` + `${question.question}\n\n`
 
+    // Escape underscores in question text to prevent Markdown parsing issues
+    // This is especially important for fill_blank questions that contain ___
+    const escapeMarkdown = (text: string) => {
+        // Escape underscores but preserve the header formatting
+        const lines = text.split("\n")
+        const escapedLines = lines.map((line, index) => {
+            // Don't escape the first line which contains the header with *测验题目*
+            if (index === 0) return line
+            // Escape underscores in other lines
+            return line.replace(/_/g, "\\_")
+        })
+        return escapedLines.join("\n")
+    }
+
+    const safeQuestionText = escapeMarkdown(questionText)
+
     // For input-based questions (translation), use ForceReply to collect text input
     if (question.isInputBased) {
         try {
             await bot.sendMessage({
                 chat_id,
-                text: questionText + `请直接输入你的答案：`,
+                text: safeQuestionText + `请直接输入你的答案：`,
                 parse_mode: "Markdown",
                 reply_markup: {
                     force_reply: true,
@@ -389,7 +405,7 @@ export const sendQuizQuestion = async (
         try {
             await bot.sendMessage({
                 chat_id,
-                text: questionText + `请选择正确答案：`,
+                text: safeQuestionText + `请选择正确答案：`,
                 parse_mode: "Markdown",
                 reply_markup: keyboard,
             })
