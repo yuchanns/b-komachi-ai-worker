@@ -135,11 +135,25 @@ Before deploying, create a D1 database for vocabulary storage:
 
 3. Initialize the database schema:
 
+    **For fresh installations:**
+
     ```bash
     wrangler d1 execute b-komachi-vocabulary --remote --file=schema.sql
     ```
 
-    **Note**: This command is safe to run multiple times. It will create tables and indexes if they don't exist. For fresh installations, all tables will be created with the current schema.
+    **For existing users upgrading from older versions:**
+
+    If you already have a database from a previous version, run the migration to add new tables:
+
+    ```bash
+    wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/001_add_user_interactions_and_preferences.sql
+    ```
+
+    This migration adds:
+    - `user_interactions` table for daily tips feature
+    - `user_preferences` table for per-user AI model selection
+
+    **Note**: Both commands are safe to run multiple times. They use `IF NOT EXISTS` to avoid errors on re-execution.
 
 Subsequently, deploy the worker by triggering Github Actions.
 
