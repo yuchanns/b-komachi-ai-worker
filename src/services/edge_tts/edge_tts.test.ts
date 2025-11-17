@@ -26,11 +26,13 @@ describe("edge_tts utilities", () => {
 })
 
 describe("edge_tts API", () => {
-    test("createEdgeTTSAPI should create API with textToSpeech method", () => {
+    test("createEdgeTTSAPI should create API with textToSpeech and listVoices methods", () => {
         const api = createEdgeTTSAPI()
         expect(api).toBeDefined()
         expect(api.textToSpeech).toBeDefined()
         expect(typeof api.textToSpeech).toBe("function")
+        expect(api.listVoices).toBeDefined()
+        expect(typeof api.listVoices).toBe("function")
     })
 
     // Note: Integration test would require actual WebSocket connection
@@ -51,5 +53,11 @@ describe("edge_tts API", () => {
             const result = api.textToSpeech(params)
             expect(result).toBeInstanceOf(Promise)
         }).not.toThrow()
+    })
+
+    test("listVoices should return a Promise", () => {
+        const api = createEdgeTTSAPI()
+        const result = api.listVoices()
+        expect(result).toBeInstanceOf(Promise)
     })
 })
