@@ -16,6 +16,7 @@ https://github.com/yuchanns/b-komachi-ai-worker/assets/25029451/7f882226-49a0-4a
 - [x] 💡 Help command and daily usage tips
 - [x] 🔄 Per-user AI model selection
 - [x] 🌍 Multi-language support (Chinese & English)
+- [x] 🎤 Customizable TTS voice selection
 - [ ] 👂 Review mode for listening to speech and selecting the answer.
 - [ ] 🌎 Support for learning multiple languages.
 - [ ] 🤔 Identify unfamiliar words within sentences.
@@ -94,6 +95,44 @@ For example:
 - `/model azure` - Switch to Azure OpenAI
 
 **Note**: You can configure multiple AI backends and let each user choose their preferred one. The bot remembers your choice for future interactions.
+
+### Switch TTS Voice
+
+View available TTS voices and switch between them:
+
+```
+/voice
+```
+
+This will show you:
+
+- Your current TTS voice
+- How to list all available voices
+- How to switch to a different voice
+
+To list all available voices:
+
+```
+/voice list [page]
+```
+
+For example:
+- `/voice list` - Show the first page of available voices
+- `/voice list 2` - Show the second page of available voices
+
+To switch to a specific voice:
+
+```
+/voice <voice-name>
+```
+
+For example:
+
+- `/voice en-US-JennyNeural` - Switch to Jenny (US English, Female)
+- `/voice zh-CN-XiaoxiaoNeural` - Switch to Xiaoxiao (Chinese, Female)
+- `/voice en-GB-RyanNeural` - Switch to Ryan (UK English, Male)
+
+**Note**: The bot remembers your voice preference for future interactions. All pronunciation audio will use your selected voice. The voice list is fetched from Microsoft Edge TTS service and includes hundreds of voices across many languages and genders.
 
 ### Vocabulary Lookup
 
@@ -185,6 +224,9 @@ Before deploying, create a D1 database for vocabulary storage:
 
     # Migration 002: Add language column to user_preferences table
     wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/002_add_language_preference.sql
+
+    # Migration 003: Add tts_voice column to user_preferences table
+    wrangler d1 execute b-komachi-vocabulary --remote --file=migrations/003_add_tts_voice_preference.sql
     ```
 
     Migration 001 adds:
@@ -193,6 +235,9 @@ Before deploying, create a D1 database for vocabulary storage:
 
     Migration 002 adds:
     - `language` column to `user_preferences` table for i18n support
+
+    Migration 003 adds:
+    - `tts_voice` column to `user_preferences` table for per-user TTS voice selection
 
     **Note**: All migrations are safe to run multiple times. They use `IF NOT EXISTS` or `ALTER TABLE ADD COLUMN` which will fail gracefully if the schema already exists.
 
