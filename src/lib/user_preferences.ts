@@ -97,6 +97,100 @@ export const getBackendInfo = (backend: AIBackend, env: Bindings): { name: strin
 }
 
 /**
+ * Get user's preferred TTS voice
+ */
+export const getUserTTSVoice = async (db: D1Database, userId: number): Promise<string | null> => {
+    const orm = drizzle(db)
+
+    const result = await orm.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1)
+
+    if (result.length === 0 || !result[0].ttsVoice) {
+        return null
+    }
+
+    return result[0].ttsVoice
+}
+
+/**
+ * Set user's preferred TTS voice
+ */
+export const setUserTTSVoice = async (db: D1Database, userId: number, voice: string): Promise<void> => {
+    const orm = drizzle(db)
+    const now = Math.floor(Date.now() / 1000)
+
+    try {
+        // Try to insert
+        await orm.insert(userPreferences).values({
+            userId,
+            ttsVoice: voice,
+            updatedAt: now,
+        })
+    } catch {
+        // If insert fails (duplicate key), update instead
+        await orm
+            .update(userPreferences)
+            .set({
+                ttsVoice: voice,
+                updatedAt: now,
+            })
+            .where(eq(userPreferences.userId, userId))
+    }
+}
+
+/**
+ * Format the voice selection menu with i18n support
+ */
+export const formatVoiceMenu = (currentVoice: string | null, i18n?: I18n): string => {
+    const defaultVoice = "en-US-AriaNeural"
+    const displayVoice = currentVoice || defaultVoice
+
+    let message = ""
+
+    if (currentVoice) {
+        message += i18n ? i18n.t("voice.current", { voice: displayVoice }) : `🎤 *当前音色*\n当前使用：*${displayVoice}*`
+    } else {
+        message += i18n
+            ? i18n.t("voice.current", { voice: `${displayVoice} _(默认)_` })
+            : `🎤 *当前音色*\n当前使用：*${displayVoice}* _(默认)_`
+    }
+
+    message += i18n ? i18n.t("voice.list_hint") : "\n\n💡 使用 `/voice list` 查看所有可用音色"
+    message += i18n ? i18n.t("voice.switch_hint") : "\n使用 `/voice <name>` 切换音色\n例如: `/voice en-US-JennyNeural`"
+
+    return message
+}
+
+/**
+ * Format the voice list for display
+ */
+export const formatVoiceList = (
+    voices: { Name: string; Gender: string; Locale: string }[],
+    page: number,
+    perPage: number,
+    i18n?: I18n
+): { message: string; hasMore: boolean } => {
+    const start = page * perPage
+    const end = start + perPage
+    const pageVoices = voices.slice(start, end)
+    const hasMore = end < voices.length
+
+    let message = i18n ? i18n.t("voice.available_voices") : "🎤 *可用音色*\n\n"
+    message += i18n
+        ? i18n.t("voice.page_info", { current: page + 1, total: Math.ceil(voices.length / perPage) })
+        : `第 ${page + 1}/${Math.ceil(voices.length / perPage)} 页\n\n`
+
+    for (const voice of pageVoices) {
+        message += `• \`${voice.Name}\` - ${voice.Locale} (${voice.Gender})\n`
+    }
+
+    if (hasMore) {
+        message += i18n ? i18n.t("voice.next_page", { page: page + 2 }) : `\n使用 \`/voice list ${page + 2}\` 查看下一页`
+    }
+
+    return { message, hasMore }
+}
+
+/**
  * Format the model selection menu with i18n support
  */
 export const formatModelMenu = (env: Bindings, currentBackend?: AIBackend | null, i18n?: I18n): string => {

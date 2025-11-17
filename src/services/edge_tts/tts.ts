@@ -1,4 +1,4 @@
-import { EdgeTTSAPI } from "./types"
+import { EdgeTTSAPI, Voice } from "./types"
 import { generateConnectionId, dateToString, generateSecMsGec } from "./utils"
 
 const TRUSTED_CLIENT_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4"
@@ -8,6 +8,7 @@ const BINARY_DELIM = "Path:audio\r\n"
 const CHROMIUM_FULL_VERSION = "140.0.3485.14"
 const CHROMIUM_MAJOR_VERSION = CHROMIUM_FULL_VERSION.split(".")[0]
 const SEC_MS_GEC_VERSION = `1-${CHROMIUM_FULL_VERSION}`
+const VOICE_LIST_URL = `https://${BASE_URL}/voices/list?Ocp-Apim-Subscription-Key=${TRUSTED_CLIENT_TOKEN}`
 
 const makeConfigRequest = (outputFormat: string) => {
     const timestamp = dateToString()
@@ -135,6 +136,28 @@ export const createEdgeTTSAPI = () => {
             } finally {
                 ws.close()
             }
+        },
+        listVoices: async (): Promise<Voice[]> => {
+            const secMsGec = await generateSecMsGec(TRUSTED_CLIENT_TOKEN)
+            const url = `${VOICE_LIST_URL}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}`
+            const headers = {
+                Authority: "speech.platform.bing.com",
+                "Sec-CH-UA": `" Not;A Brand";v="99", "Microsoft Edge";v="${CHROMIUM_MAJOR_VERSION}", "Chromium";v="${CHROMIUM_MAJOR_VERSION}"`,
+                "Sec-CH-UA-Mobile": "?0",
+                Accept: "*/*",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Dest": "empty",
+                "User-Agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROMIUM_MAJOR_VERSION}.0.0.0 Safari/537.36 Edg/${CHROMIUM_MAJOR_VERSION}.0.0.0`,
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Language": "en-US,en;q=0.9",
+            }
+            const response = await fetch(url, { headers })
+            if (!response.ok) {
+                throw new Error(`Failed to fetch voices: ${response.statusText}`)
+            }
+            const voices: Voice[] = await response.json()
+            return voices
         },
     } as EdgeTTSAPI
 }
