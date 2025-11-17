@@ -46,6 +46,28 @@ export const createAI = async (c: Context<{ Bindings: Bindings }>, userId?: numb
     })
 }
 
-export const createTTS = (_c: Context<{ Bindings: Bindings }>) => {
-    return createEdgeTTSAPI()
+export const createTTS = async (c: Context<{ Bindings: Bindings }>, userId?: number) => {
+    let voice: string | undefined = undefined
+
+    // If userId is provided, check for user preference
+    if (userId && c.env.DB) {
+        const { getUserTTSVoice } = await import("../lib/user_preferences")
+        const userVoice = await getUserTTSVoice(c.env.DB, userId)
+        if (userVoice) {
+            voice = userVoice
+        }
+    }
+
+    const tts = createEdgeTTSAPI()
+
+    // Return a wrapper that applies the user's voice preference
+    return {
+        textToSpeech: (params: Parameters<typeof tts.textToSpeech>[0]) => {
+            return tts.textToSpeech({
+                ...params,
+                voice: params.voice || voice || "en-US-AriaNeural",
+            })
+        },
+        listVoices: tts.listVoices,
+    }
 }

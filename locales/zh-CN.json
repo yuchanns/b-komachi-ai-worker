@@ -42,6 +42,14 @@
             "supported": "支持的语言：zh-CN (中文)、en (English)",
             "example": "例如：`/lang en`"
         },
+        "voice_switch": {
+            "title": "*🎤 切换音色*",
+            "description": "查看和切换 TTS 音色：",
+            "view_command": "`/voice` - 查看当前音色",
+            "list_command": "`/voice list` - 列出所有可用音色",
+            "switch_command": "`/voice <name>` - 切换音色",
+            "example": "例如：`/voice en-US-JennyNeural`"
+        },
         "help_command": {
             "title": "*💡 帮助*",
             "description": "随时发送 `/help` 查看此帮助信息"
@@ -69,6 +77,19 @@
         "switch_hint": "\n\n💡 使用 `/lang <code>` 切换语言\n例如: `/lang en`",
         "switched": "✅ 语言已切换到中文",
         "invalid": "❌ 不支持的语言代码: *{code}*\n\n请使用: `zh-CN` 或 `en`"
+    },
+    "voice": {
+        "current": "🎤 *当前音色*\n当前使用: *{voice}*",
+        "list_hint": "\n\n💡 使用 `/voice list` 查看所有可用音色",
+        "switch_hint": "\n使用 `/voice <name>` 切换音色\n例如: `/voice en-US-JennyNeural`",
+        "available_voices": "🎤 *可用音色*\n\n",
+        "page_info": "第 {current}/{total} 页\n\n",
+        "next_page": "\n使用 `/voice list {page}` 查看下一页",
+        "switched": "✅ 已切换到音色: *{voice}*",
+        "not_found": "❌ 未找到音色 *{voice}*\n\n使用 `/voice list` 查看可用音色",
+        "invalid_format": "❌ 格式无效\n\n使用 `/voice <name>` 切换音色",
+        "list_error": "❌ 获取音色列表时出错: {message}",
+        "switch_error": "❌ 切换音色时出错: {message}"
     },
     "quiz": {
         "not_enough_words": "❌ 词汇量不足\n\n你需要至少查询 *{min}* 个单词才能开始测验。\n当前词汇量: *{current}*\n\n💡 @ 我并输入单词来建立你的词汇库！",

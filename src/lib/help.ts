@@ -105,11 +105,17 @@ export const isUserInteraction = (update: Update, botUsername: string): boolean 
  * Register built-in interaction matchers
  */
 
-// Command matcher: /help, /quiz, /model, /lang, etc.
+// Command matcher: /help, /quiz, /model, /lang, /voice, etc.
 registerInteraction((update: Update) => {
     const text = update.message?.text
     if (!text) return false
-    return text.startsWith("/help") || text.startsWith("/quiz") || text.startsWith("/model") || text.startsWith("/lang")
+    return (
+        text.startsWith("/help") ||
+        text.startsWith("/quiz") ||
+        text.startsWith("/model") ||
+        text.startsWith("/lang") ||
+        text.startsWith("/voice")
+    )
 })
 
 // Vocabulary query matcher: @bot_name word

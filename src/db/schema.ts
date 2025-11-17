@@ -57,6 +57,7 @@ export const userPreferences = sqliteTable(
         userId: integer("user_id").primaryKey(),
         aiBackend: text("ai_backend"),
         language: text("language"),
+        ttsVoice: text("tts_voice"),
         updatedAt: integer("updated_at").notNull(),
     },
     (table) => ({

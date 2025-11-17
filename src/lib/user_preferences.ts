@@ -12,6 +12,21 @@ export const AI_BACKENDS = ["azure", "gemini", "openai"] as const
 export type AIBackend = (typeof AI_BACKENDS)[number]
 
 /**
+ * Supported learning languages for voice filtering
+ * Currently only English is supported, but this can be extended in the future
+ */
+export const LEARNING_LANGUAGES = ["en"] as const
+export type LearningLanguage = (typeof LEARNING_LANGUAGES)[number]
+
+/**
+ * Get the current learning language
+ * TODO: This will be extended to support user-specific learning language preferences
+ */
+export const getCurrentLearningLanguage = (): LearningLanguage => {
+    return "en" // Currently fixed to English
+}
+
+/**
  * Get user's preferred AI backend
  */
 export const getUserAIBackend = async (db: D1Database, userId: number): Promise<AIBackend | null> => {
@@ -94,6 +109,115 @@ export const getBackendInfo = (backend: AIBackend, env: Bindings): { name: strin
                 model: env.ENV_OPENAI_MODEL || "gpt-3.5-turbo",
             }
     }
+}
+
+/**
+ * Get user's preferred TTS voice
+ */
+export const getUserTTSVoice = async (db: D1Database, userId: number): Promise<string | null> => {
+    const orm = drizzle(db)
+
+    const result = await orm.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1)
+
+    if (result.length === 0 || !result[0].ttsVoice) {
+        return null
+    }
+
+    return result[0].ttsVoice
+}
+
+/**
+ * Set user's preferred TTS voice
+ */
+export const setUserTTSVoice = async (db: D1Database, userId: number, voice: string): Promise<void> => {
+    const orm = drizzle(db)
+    const now = Math.floor(Date.now() / 1000)
+
+    try {
+        // Try to insert
+        await orm.insert(userPreferences).values({
+            userId,
+            ttsVoice: voice,
+            updatedAt: now,
+        })
+    } catch {
+        // If insert fails (duplicate key), update instead
+        await orm
+            .update(userPreferences)
+            .set({
+                ttsVoice: voice,
+                updatedAt: now,
+            })
+            .where(eq(userPreferences.userId, userId))
+    }
+}
+
+/**
+ * Format the voice selection menu with i18n support
+ */
+export const formatVoiceMenu = (currentVoice: string | null, i18n?: I18n): string => {
+    const defaultVoice = "en-US-AriaNeural"
+    const displayVoice = currentVoice || defaultVoice
+
+    let message = ""
+
+    if (currentVoice) {
+        message += i18n ? i18n.t("voice.current", { voice: displayVoice }) : `🎤 *当前音色*\n当前使用：*${displayVoice}*`
+    } else {
+        message += i18n
+            ? i18n.t("voice.current", { voice: `${displayVoice} _(默认)_` })
+            : `🎤 *当前音色*\n当前使用：*${displayVoice}* _(默认)_`
+    }
+
+    message += i18n ? i18n.t("voice.list_hint") : "\n\n💡 使用 `/voice list` 查看所有可用音色"
+    message += i18n ? i18n.t("voice.switch_hint") : "\n使用 `/voice <name>` 切换音色\n例如: `/voice en-US-JennyNeural`"
+
+    return message
+}
+
+/**
+ * Filter voices by learning language
+ */
+export const filterVoicesByLanguage = (
+    voices: { Name: string; Locale: string }[],
+    language: LearningLanguage
+): { Name: string; Locale: string }[] => {
+    return voices.filter((voice) => voice.Locale.toLowerCase().startsWith(language.toLowerCase() + "-"))
+}
+
+/**
+ * Format the voice list for display
+ */
+export const formatVoiceList = (
+    voices: { Name: string; Gender: string; Locale: string }[],
+    page: number,
+    perPage: number,
+    i18n?: I18n,
+    learningLanguage?: LearningLanguage
+): { message: string; hasMore: boolean } => {
+    // Filter voices by learning language
+    const language = learningLanguage || getCurrentLearningLanguage()
+    const filteredVoices = filterVoicesByLanguage(voices, language)
+
+    const start = page * perPage
+    const end = start + perPage
+    const pageVoices = filteredVoices.slice(start, end)
+    const hasMore = end < filteredVoices.length
+
+    let message = i18n ? i18n.t("voice.available_voices") : "🎤 *可用音色*\n\n"
+    message += i18n
+        ? i18n.t("voice.page_info", { current: page + 1, total: Math.ceil(filteredVoices.length / perPage) })
+        : `第 ${page + 1}/${Math.ceil(filteredVoices.length / perPage)} 页\n\n`
+
+    for (const voice of pageVoices) {
+        message += `• \`${voice.Name}\` - ${voice.Locale} (${voice.Gender})\n`
+    }
+
+    if (hasMore) {
+        message += i18n ? i18n.t("voice.next_page", { page: page + 2 }) : `\n使用 \`/voice list ${page + 2}\` 查看下一页`
+    }
+
+    return { message, hasMore }
 }
 
 /**

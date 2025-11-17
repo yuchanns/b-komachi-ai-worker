@@ -38,7 +38,6 @@ hook.get("/unRegisterWebhook", async (c) => {
 hook.post(WEBHOOK, async (c) => {
     const update: Update = await c.req.json()
     const bot = createBot(c)
-    const tts = createTTS(c)
     const db = c.env.DB
 
     // Check if DB is properly configured
@@ -57,6 +56,7 @@ hook.post(WEBHOOK, async (c) => {
     const userId = update.message?.from?.id || update.callback_query?.from?.id
     const telegramLanguageCode = update.message?.from?.language_code || update.callback_query?.from?.language_code
     const ai = await createAI(c, userId)
+    const tts = await createTTS(c, userId)
 
     // Create i18n instance for the user with auto-detection
     const i18n = await createI18nForUser(db, userId, telegramLanguageCode)
@@ -167,6 +167,92 @@ hook.post(WEBHOOK, async (c) => {
                     text: i18n.t("model.invalid", { backend: command, available }),
                     parse_mode: "Markdown",
                 })
+            }
+        } else if (update.message?.text?.startsWith("/voice")) {
+            // Handle /voice command
+            const { chat, from, text } = update.message
+            if (!from) {
+                return new Response("Ok")
+            }
+
+            const args = text?.split(/\s+/)
+            const command = args?.[1]?.toLowerCase()
+
+            if (!command) {
+                // Show current voice
+                const { getUserTTSVoice, formatVoiceMenu } = await import("../lib/user_preferences")
+                const currentVoice = await getUserTTSVoice(db, from.id)
+                const menu = formatVoiceMenu(currentVoice, i18n)
+                await bot.sendMessage({
+                    chat_id: chat.id,
+                    text: menu,
+                    parse_mode: "Markdown",
+                })
+            } else if (command === "list") {
+                // Show available voices
+                const page = parseInt(args?.[2] || "1") - 1
+                const perPage = 20
+
+                try {
+                    const voices = await tts.listVoices()
+                    const { formatVoiceList } = await import("../lib/user_preferences")
+                    const { message } = formatVoiceList(voices, page, perPage, i18n)
+                    await bot.sendMessage({
+                        chat_id: chat.id,
+                        text: message,
+                        parse_mode: "Markdown",
+                    })
+                } catch (error) {
+                    await bot.sendMessage({
+                        chat_id: chat.id,
+                        text: i18n.t("voice.list_error", { message: String(error) }),
+                        parse_mode: "Markdown",
+                    })
+                }
+            } else {
+                // Set user's preferred voice
+                const voiceName = args?.slice(1).join(" ")
+
+                if (!voiceName) {
+                    await bot.sendMessage({
+                        chat_id: chat.id,
+                        text: i18n.t("voice.invalid_format"),
+                        parse_mode: "Markdown",
+                    })
+                    return new Response("Ok")
+                }
+
+                // Verify the voice exists
+                try {
+                    const voices = await tts.listVoices()
+                    const { filterVoicesByLanguage, getCurrentLearningLanguage } = await import("../lib/user_preferences")
+                    const learningLanguage = getCurrentLearningLanguage()
+                    const filteredVoices = filterVoicesByLanguage(voices, learningLanguage)
+                    const voice = filteredVoices.find((v) => v.Name === voiceName || v.ShortName === voiceName)
+
+                    if (!voice) {
+                        await bot.sendMessage({
+                            chat_id: chat.id,
+                            text: i18n.t("voice.not_found", { voice: voiceName }),
+                            parse_mode: "Markdown",
+                        })
+                        return new Response("Ok")
+                    }
+
+                    const { setUserTTSVoice } = await import("../lib/user_preferences")
+                    await setUserTTSVoice(db, from.id, voice.Name)
+                    await bot.sendMessage({
+                        chat_id: chat.id,
+                        text: i18n.t("voice.switched", { voice: voice.Name }),
+                        parse_mode: "Markdown",
+                    })
+                } catch (error) {
+                    await bot.sendMessage({
+                        chat_id: chat.id,
+                        text: i18n.t("voice.switch_error", { message: String(error) }),
+                        parse_mode: "Markdown",
+                    })
+                }
             }
         } else if (update.message?.text?.startsWith("/quiz")) {
             // Handle /quiz command

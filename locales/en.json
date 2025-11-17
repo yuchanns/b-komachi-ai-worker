@@ -42,6 +42,14 @@
             "supported": "Supported languages: zh-CN (中文), en (English)",
             "example": "Example: `/lang zh-CN`"
         },
+        "voice_switch": {
+            "title": "*🎤 Switch Voice*",
+            "description": "View and switch TTS voice:",
+            "view_command": "`/voice` - View current voice",
+            "list_command": "`/voice list` - List all available voices",
+            "switch_command": "`/voice <name>` - Switch voice",
+            "example": "Example: `/voice en-US-JennyNeural`"
+        },
         "help_command": {
             "title": "*💡 Help*",
             "description": "Send `/help` anytime to view this help message"
@@ -69,6 +77,19 @@
         "switch_hint": "\n\n💡 Use `/lang <code>` to switch language\nExample: `/lang zh-CN`",
         "switched": "✅ Language switched to English",
         "invalid": "❌ Unsupported language code: *{code}*\n\nPlease use: `zh-CN` or `en`"
+    },
+    "voice": {
+        "current": "🎤 *Current Voice*\nCurrently using: *{voice}*",
+        "list_hint": "\n\n💡 Use `/voice list` to view all available voices",
+        "switch_hint": "\nUse `/voice <name>` to switch voice\nExample: `/voice en-US-JennyNeural`",
+        "available_voices": "🎤 *Available Voices*\n\n",
+        "page_info": "Page {current}/{total}\n\n",
+        "next_page": "\nUse `/voice list {page}` to view next page",
+        "switched": "✅ Switched to voice: *{voice}*",
+        "not_found": "❌ Voice *{voice}* not found\n\nUse `/voice list` to see available voices",
+        "invalid_format": "❌ Invalid format\n\nUse `/voice <name>` to switch voice",
+        "list_error": "❌ Error fetching voice list: {message}",
+        "switch_error": "❌ Error switching voice: {message}"
     },
     "quiz": {
         "not_enough_words": "❌ Insufficient vocabulary\n\nYou need at least *{min}* words to start a quiz.\nCurrent vocabulary: *{current}*\n\n💡 @ me with words to build your vocabulary!",
