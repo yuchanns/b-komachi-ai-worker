@@ -117,8 +117,11 @@ To list all available voices:
 ```
 
 For example:
+
 - `/voice list` - Show the first page of available voices
 - `/voice list 2` - Show the second page of available voices
+
+**Note**: The voice list is automatically filtered to show only English voices (those starting with `en-`). This is because the bot currently focuses on English vocabulary learning. In the future, this will be extended to support other learning languages.
 
 To switch to a specific voice:
 
@@ -129,10 +132,10 @@ To switch to a specific voice:
 For example:
 
 - `/voice en-US-JennyNeural` - Switch to Jenny (US English, Female)
-- `/voice zh-CN-XiaoxiaoNeural` - Switch to Xiaoxiao (Chinese, Female)
 - `/voice en-GB-RyanNeural` - Switch to Ryan (UK English, Male)
+- `/voice en-AU-NatashaNeural` - Switch to Natasha (Australian English, Female)
 
-**Note**: The bot remembers your voice preference for future interactions. All pronunciation audio will use your selected voice. The voice list is fetched from Microsoft Edge TTS service and includes hundreds of voices across many languages and genders.
+**Note**: The bot remembers your voice preference for future interactions. All pronunciation audio will use your selected voice. Only English voices are currently available, matching the bot's focus on English vocabulary learning.
 
 ### Vocabulary Lookup
 

@@ -225,7 +225,10 @@ hook.post(WEBHOOK, async (c) => {
                 // Verify the voice exists
                 try {
                     const voices = await tts.listVoices()
-                    const voice = voices.find((v) => v.Name === voiceName || v.ShortName === voiceName)
+                    const { filterVoicesByLanguage, getCurrentLearningLanguage } = await import("../lib/user_preferences")
+                    const learningLanguage = getCurrentLearningLanguage()
+                    const filteredVoices = filterVoicesByLanguage(voices, learningLanguage)
+                    const voice = filteredVoices.find((v) => v.Name === voiceName || v.ShortName === voiceName)
 
                     if (!voice) {
                         await bot.sendMessage({

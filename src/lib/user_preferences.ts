@@ -12,6 +12,21 @@ export const AI_BACKENDS = ["azure", "gemini", "openai"] as const
 export type AIBackend = (typeof AI_BACKENDS)[number]
 
 /**
+ * Supported learning languages for voice filtering
+ * Currently only English is supported, but this can be extended in the future
+ */
+export const LEARNING_LANGUAGES = ["en"] as const
+export type LearningLanguage = (typeof LEARNING_LANGUAGES)[number]
+
+/**
+ * Get the current learning language
+ * TODO: This will be extended to support user-specific learning language preferences
+ */
+export const getCurrentLearningLanguage = (): LearningLanguage => {
+    return "en" // Currently fixed to English
+}
+
+/**
  * Get user's preferred AI backend
  */
 export const getUserAIBackend = async (db: D1Database, userId: number): Promise<AIBackend | null> => {
@@ -161,23 +176,38 @@ export const formatVoiceMenu = (currentVoice: string | null, i18n?: I18n): strin
 }
 
 /**
+ * Filter voices by learning language
+ */
+export const filterVoicesByLanguage = (
+    voices: { Name: string; Locale: string }[],
+    language: LearningLanguage
+): { Name: string; Locale: string }[] => {
+    return voices.filter((voice) => voice.Locale.toLowerCase().startsWith(language.toLowerCase() + "-"))
+}
+
+/**
  * Format the voice list for display
  */
 export const formatVoiceList = (
     voices: { Name: string; Gender: string; Locale: string }[],
     page: number,
     perPage: number,
-    i18n?: I18n
+    i18n?: I18n,
+    learningLanguage?: LearningLanguage
 ): { message: string; hasMore: boolean } => {
+    // Filter voices by learning language
+    const language = learningLanguage || getCurrentLearningLanguage()
+    const filteredVoices = filterVoicesByLanguage(voices, language)
+
     const start = page * perPage
     const end = start + perPage
-    const pageVoices = voices.slice(start, end)
-    const hasMore = end < voices.length
+    const pageVoices = filteredVoices.slice(start, end)
+    const hasMore = end < filteredVoices.length
 
     let message = i18n ? i18n.t("voice.available_voices") : "🎤 *可用音色*\n\n"
     message += i18n
-        ? i18n.t("voice.page_info", { current: page + 1, total: Math.ceil(voices.length / perPage) })
-        : `第 ${page + 1}/${Math.ceil(voices.length / perPage)} 页\n\n`
+        ? i18n.t("voice.page_info", { current: page + 1, total: Math.ceil(filteredVoices.length / perPage) })
+        : `第 ${page + 1}/${Math.ceil(filteredVoices.length / perPage)} 页\n\n`
 
     for (const voice of pageVoices) {
         message += `• \`${voice.Name}\` - ${voice.Locale} (${voice.Gender})\n`
